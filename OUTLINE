@@ -41,12 +41,25 @@ class Origin {
     return airport + ", " + city;
 }
 
+// Classes Akira
+class originState {
+  String originAirport;
+  String stateCode;
+}
 
-OriginState – Origin Airport, State Code (text string).
-OriginWac – Origin Airport, World Area Code (integer, see separate lookup table to map
-numbers to countries).
-Dest - Destination Airport (text string)
-DestCityName - Destination Airport, City Name (text string).
+class originWAC {
+  String originAirport;
+  int worldAreaCode;
+}
+
+class destination {
+  String destinationAirport;
+}
+
+class destinationCityName {
+  String destinationAirport;
+  String cityName;
+}
 
 
 
