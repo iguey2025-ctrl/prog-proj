@@ -16,7 +16,7 @@ class FlightDate{
   int day;
 } 
 
-class IATA_Code_Marketing_Airline{
+class IATACodeMarketingAirline{
   String airlineCode;
 
   String getCode(){
@@ -25,7 +25,7 @@ class IATA_Code_Marketing_Airline{
 
 }
 
-class Flight_Number_Marketing_Airline{
+class FlightNumberMarketingAirline{
   int flightNumber;
 
   String getNumber(){
@@ -90,7 +90,27 @@ class Distance {
   int distance;
 }
 
+//====================DATAPOINT CLASS========================
 
-DATAPOINT - instance variables are every other class
+class DATAPOINT {
+  FlightDate flightDate;
+  IATA_Code_Marketing_Airline IATACode;
+  Flight_Number_Marketing_Airline flightNumber;
+  Origin origin;
+  OriginState originState;
+  OriginWac originWac;
+  Dest dest;
+  DestCityName destCityName;
+  DestState destState;
+  DestWac destWac;
+  CRSDepTime crsDep;
+  DepTime depTime;
+  CRSArrTime crsArr;
+  ArrTime arrTime;
+  CancelledFlight cancFlight;
+  DivertedFlight divFlight;
+  Distance dist;
+
+} 
 
 
