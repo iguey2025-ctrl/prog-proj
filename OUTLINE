@@ -36,9 +36,25 @@ CRSArrTime – Scheduled arrival time.
 
 
 
-ArrTime – Actual arrival time.
-Cancelled – Cancelled Flight indicator (1=yes).
-Diverted – Diverted Flight indicator (1=yes).
-Distance – Distance between airports in miles
+
+class ArrTime {
+  int hour;
+  int minute;
+}
+
+class CancelledFlight {
+  boolean cancelled;
+}
+
+class DivertedFlight {
+  boolean diverted;
+}
+
+class Distance {
+  int distance;
+}
+
+
 DATAPOINT - instance variables are every other class
+
 
