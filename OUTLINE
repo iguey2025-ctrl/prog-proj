@@ -62,12 +62,14 @@ class destinationCityName {
 }
 
 
-
+// classes Naz 
 class DestState{
-  string stateCode;
+  String destinationAirport;
+  String stateCode;
 }
 
 class DestWac{
+  String destinationAirport;
   int wac;
 }
 
