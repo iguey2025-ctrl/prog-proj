@@ -63,12 +63,28 @@ class destinationCityName {
 
 
 
-DestState - Destination Airport, State Code (text string).
-DestWac - Destination Airport, World Area Code (integer, see separate lookup table to map
-numbers to countries).
-CRSDepTime – Scheduled departure time (hhmm)
-DepTime – Actual departure time (hhmm)
-CRSArrTime – Scheduled arrival time.
+class DestState{
+  string stateCode;
+}
+
+class DestWac{
+  int wac;
+}
+
+class CRSDepTime{
+  int hour;
+  int minute; 
+}
+
+class DepTime{
+  int hour;
+  int minute;
+}
+
+class CRSArrTime{
+  int hour;
+  int minute;
+}
 
 
 
