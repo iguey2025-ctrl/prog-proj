@@ -1,6 +1,30 @@
-hello world
 
-jkguyffutvjkugfut
+main class{
+import and read code 
+button to filter flights by airport, date range, lateness 
+button to draw selected data 
+}
+CLASSES:
+FlightDate – The date of the flight in yyyymmdd format – you may ignore the hours and minutes
+(which are zero).
+IATA_Code_Marketing_Airline – Code to identify the carrier e.g. AA.
+Flight_Number_Marketing_Airline – The flight number (combine with the carrier code to obtain
+the usual format).
+Origin - Origin Airport (text string). OriginCityName - Origin Airport, City Name (text string).
+OriginState – Origin Airport, State Code (text string).
+OriginWac – Origin Airport, World Area Code (integer, see separate lookup table to map
+numbers to countries).
+Dest - Destination Airport (text string)
+DestCityName - Destination Airport, City Name (text string).
+DestState - Destination Airport, State Code (text string).
+DestWac - Destination Airport, World Area Code (integer, see separate lookup table to map
+numbers to countries).
+CRSDepTime – Scheduled departure time (hhmm)
+DepTime – Actual departure time (hhmm)
+CRSArrTime – Scheduled arrival time.
+ArrTime – Actual arrival time.
+Cancelled – Cancelled Flight indicator (1=yes).
+Diverted – Diverted Flight indicator (1=yes).
+Distance – Distance between airports in miles
+DATAPOINT - instance variables are every other class
 
-
-klsdhlbqqlqqqqqqqq
