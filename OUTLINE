@@ -4,12 +4,15 @@ button to filter flights by airport, date range, lateness
 button to draw selected data 
 
 
-String getFlightCode({
+String getFlightCode(DataPoint dp){
+  dp.IATACode() + dp.flightNumber();
+}
+
 
 }
-}
 
-//====================CLASSES===========================
+
+//====================VARIABLE CLASSES===========================
 class FlightDate{
   int year;
   int month;
@@ -22,7 +25,6 @@ class IATACodeMarketingAirline{
   String getCode(){
     return airlineCode;
   }
-
 }
 
 class FlightNumberMarketingAirline{
@@ -106,9 +108,13 @@ class Distance {
   int distance;
 }
 
+//==========END OF VARIABLE CLASSES=================
+
+
+
 //====================DATAPOINT CLASS========================
 
-class DATAPOINT {
+class DataPoint {
   FlightDate flightDate;
   IATA_Code_Marketing_Airline IATACode;
   Flight_Number_Marketing_Airline flightNumber;
@@ -127,6 +133,7 @@ class DATAPOINT {
   DivertedFlight divFlight;
   Distance dist;
 
+  
 } 
 
 
