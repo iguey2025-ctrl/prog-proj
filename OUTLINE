@@ -1,19 +1,61 @@
 main class{
-import and read code 
+/* import and read code 
 button to filter flights by airport, date range, lateness 
 button to draw selected data 
 options to change color + appearance of graphs 
-hover over graph to see each entry point ????
+hover over graph to see each entry point ????*/
 
 
-String getFlightCode(DataPoint dp){
-  dp.IATACode() + dp.flightNumber();
-}
-////final test bruh
+
 
 }
 
+//====================DATAPOINT CLASS========================
 
+class DataPoint {
+  FlightDate flightDate;
+  IATA_Code_Marketing_Airline IATACode;
+  Flight_Number_Marketing_Airline flightNumber;
+  Origin origin;
+  OriginState originState;
+  OriginWac originWac;
+  Dest dest;
+  DestCityName destCityName;
+  DestState destState;
+  DestWac destWac;
+  CRSDepTime crsDep;
+  DepTime depTime;
+  CRSArrTime crsArr;
+  ArrTime arrTime;
+  CancelledFlight cancFlight;
+  DivertedFlight divFlight;
+  Distance dist;
+
+  FlightDate getFlightDate(){return flightDate;}
+  IATA_Code_Marketing_Airline getIATA(){return IATACode;}
+  Flight_Number_Marketing_Airline getFlightNumber(){return flightNumber;}
+  Origin getOrigin(){return origin;}
+  OriginState getOriginState(){return originState;}
+  OriginWac getOriginWac(){return originWac;}
+  Dest getDest(){return dest;}
+  DestCityName getDestCityName(){return destCityName;}
+  DestState getDestState(){return destState;}
+  DestWac getDestWac(){return destWac;}
+  CRSDepTime getCrsDep(){return crsDep;}
+  DepTime getDepTime(){return depTime;}
+  CRSArrTime getCrsArr(){return crsArr;}
+  ArrTime getArrTime(){return arrTime;}
+  CancelledFlight getCancFlight(){return cancFlight;}
+  DivertedFlight getDivFlight(){return divFlight;}
+  Distance getDist(){return dist;}
+
+  String getFlightCode(){
+    return IATACode + flightNumber;
+  }
+
+}
+
+class Widget
 //====================VARIABLE CLASSES===========================
 class FlightDate{
   int year;
@@ -114,30 +156,7 @@ class Distance {
 
 //==========END OF VARIABLE CLASSES=================
 
-
-
-//====================DATAPOINT CLASS========================
-
-class DataPoint {
-  FlightDate flightDate;
-  IATA_Code_Marketing_Airline IATACode;
-  Flight_Number_Marketing_Airline flightNumber;
-  Origin origin;
-  OriginState originState;
-  OriginWac originWac;
-  Dest dest;
-  DestCityName destCityName;
-  DestState destState;
-  DestWac destWac;
-  CRSDepTime crsDep;
-  DepTime depTime;
-  CRSArrTime crsArr;
-  ArrTime arrTime;
-  CancelledFlight cancFlight;
-  DivertedFlight divFlight;
-  Distance dist;
-
   
-} 
+
 
 
