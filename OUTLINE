@@ -86,8 +86,6 @@ class DataPoint {
 
 }
 
-<<<<<<< HEAD
-=======
 
 class Screen {
   ArrayList screenWidgets;
@@ -147,20 +145,48 @@ class Widget{
     this.widgetColor = widgetColor; this.widgetFont = widgetFont;
     labelColor = color(0); lineColor = color(0);
   }
->>>>>>> e28b6598dcab277f7c9f92d23dddc2eeae54ad9d
   void draw(){
-        return event;
+    fill (widgetColor); stroke (lineColor);
+    rect(x, y, width, height);
+    fill(labelColor);
+    text (label, x+10, y+height-10);
+    }
+    void mouseOver() {
+      lineColor = color(255);
+    }
+    void mouseNotOver() {
+      lineColor = color(0);
+    }
+    int getEvent(int mX, int mY){
+      if(mX>x && mX < x+width && mY >y && mY <y+height){
+    return event;
     }
     return EVENT_NULL;
   }
-<<<<<<< HEAD
-
-
- //====================VARIABLE CLASSES===========================
-=======
 }
+
+class TextWidget extends Widget{
+int maxlen;
+TextWidget (int x, int y, int width, int height, String label,
+color widgetColor, PFont font, int event, int maxlen){
+  super (x, y, width, height, label, widgetColor, font, event);
+  this.x = x; this.y = y; this.width = width; this.height = height;
+  this.label = label; this.event = event; 
+  this.widgetColor = widgetColor; this.widgetFont = font;
+  labelColor = color(0); this.maxlen = maxlen;
+  }
+  void append(char s){
+    if (s==BACKSPACE){
+      if (!label.equals(""))
+      label = label.substring(0, label.length()-1);
+    }
+    else if (label.length() < maxlen)
+    label = label + str(s);
+  }
+}
+
+
 //====================VARIABLE CLASSES===========================
->>>>>>> e28b6598dcab277f7c9f92d23dddc2eeae54ad9d
 class FlightDate{
   int year;
   int month;
@@ -189,6 +215,7 @@ class Origin {
 
   String getAirportAndCity(){
     return airport + ", " + city;
+  }
 }
 
 // Classes Akira
