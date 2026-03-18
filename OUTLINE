@@ -86,35 +86,42 @@ class DataPoint {
 
 }
 
+<<<<<<< HEAD
+=======
 
+class Screen {
+  ArrayList screenWidgets;
+  color screenColor;
+  Screen(color screenColor){
+    screenWidgets=new ArrayList();
+    this.screenColor=screenColor;
+  }
+  void add(Widget w){
+    screenWidgets.add(w);
+  }
+  void draw(){
+    background(screenColor);
+    for(int i = 0; i<screenWidgets.size(); i++){
+      Widget aWidget = (Widget)screenWidgets.get(i);
+      aWidget.draw();
+    }
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  int getEvent(int mx, int my){
+    for(int i = 0; i<screenWidgets.size(); i++){
+      Widget aWidget = (Widget) screenWidgets.get(i);
+      int event = aWidget.getEvent(mouseX,mouseY);
+      if(event != EVENT_NULL){
+        return event;
+      }
+    }
+    return EVENT_NULL;
+  }
+  ArrayList getWidgets()
+  {
+    return screenWidgets;
+  }
+}
 
 
 
@@ -140,26 +147,20 @@ class Widget{
     this.widgetColor = widgetColor; this.widgetFont = widgetFont;
     labelColor = color(0); lineColor = color(0);
   }
+>>>>>>> e28b6598dcab277f7c9f92d23dddc2eeae54ad9d
   void draw(){
-    fill(widgetColor); stroke(lineColor);
-    rect(x, y, width, height);
-    fill(labelColor);
-    text(label, x+10, y+height-10);
-  }
-  void mouseOver(){
-    lineColor = color(255);
-  }
-  void mouseNotOver(){
-    lineColor = color(0);
-  }
-  int getEvent(int mX, int mY){
-    if (mX > x && mX < x + width && mY > y && mY < y + heigth){
-      return event;
+        return event;
     }
     return EVENT_NULL;
   }
+<<<<<<< HEAD
+
+
+ //====================VARIABLE CLASSES===========================
+=======
 }
 //====================VARIABLE CLASSES===========================
+>>>>>>> e28b6598dcab277f7c9f92d23dddc2eeae54ad9d
 class FlightDate{
   int year;
   int month;
