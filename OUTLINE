@@ -86,6 +86,50 @@ class DataPoint {
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Widget{
   int x, y, width, height; String label; int event;
   color widgetColor, labelColor, lineColor; PFont widgetFont;
@@ -115,9 +159,6 @@ class Widget{
     return EVENT_NULL;
   }
 }
-
-
-
 //====================VARIABLE CLASSES===========================
 class FlightDate{
   int year;
