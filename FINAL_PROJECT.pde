@@ -1,24 +1,35 @@
 
 ArrayList widgetList;
 PFont stdFont;
-final int EVENT_BUTTON1=1;
-final int EVENT_BUTTON2=2;
+final int EVENT_BUTTON_QUERY=1;
+final int EVENT_BUTTON_DRAW=2;
 final int EVENT_NULL=0;
+Table table;
 void setup(){
+  table = loadTable("flights2k.csv");
+
   Widget widget1,widget2;
   size(400,400);
-  stdFont=loadFont(); textFont(stdFont);
+  stdFont=loadFont("Chalkboard-30.vlw"); textFont(stdFont);
   widgetEntryText=new Widget(100,100,100,40,"Generate Entry Text", color(100), stdFont, EVENT_BUTTON1);
   widgetDrawGraph=new Widget(100,200,100,40,"Draw Graph",color(150), stdFont, EVENT_BUTTON2);
   widgetList = new ArrayList();
   widgetList.add(widgetEntryText); widgetList.add(widgetDrawGraph);
+
+screen1 = new Screen(color(255));
+screen2 = new Screen(color(150));
+screen1.add(widgetEntryText);
+screen1.add(widgetDrawGraph);
+currentScreen = screen1;
+
 }
 
 void draw(){
-  for(int i=0; i<widgetList.size(); i++){
-    Widget aWidget = (Widget) widgetList.get(i);
-    aWidget.draw();
-  }
+  currentScreen.draw();
+  // for(int i=0; i<widgetList.size(); i++){
+  //   Widget aWidget = (Widget) widgetList.get(i);
+  //   aWidget.draw();
+  // }
 
 }
 void mousePressed(){
@@ -27,10 +38,12 @@ void mousePressed(){
       Widget aWidget = (Widget) widgetList.get(i);
       event = aWidget.getEvent(mouseX, mouseY);
       switch(event){
+        case EVENT_BUTTON_QUERY:
+      switch(currentScreen.getEvent(mouseX, mouseY)){
         case EVENT_BUTTON1:
             println("button 1!");
             break;
-        case EVENT_BUTTON2:
+        case EVENT_BUTTON_DRAW:
             println("button 2!");
             break;
       }
@@ -38,6 +51,11 @@ void mousePressed(){
 
 }
 
+void keyPressed(){
+  if(focus != null){
+    focus.append(key);
+  }
+}
 
 
 
@@ -88,8 +106,105 @@ class DataPoint {
 }
 
 
+class Screen {
+  ArrayList screenWidgets;
+  color screenColor;
+  Screen(color screenColor){
+    screenWidgets=new ArrayList();
+    this.screenColor=screenColor;
+  }
+  void add(Widget w){
+    screenWidgets.add(w);
+  }
+  void draw(){
+    background(screenColor);
+    for(int i = 0; i<screenWidgets.size(); i++){
+      Widget aWidget = (Widget)screenWidgets.get(i);
+      aWidget.draw();
+    }
+  }
 
-class Widget
+  int getEvent(int mx, int my){
+    for(int i = 0; i<screenWidgets.size(); i++){
+      Widget aWidget = (Widget) screenWidgets.get(i);
+      int event = aWidget.getEvent(mouseX,mouseY);
+      if(event != EVENT_NULL){
+        return event;
+      }
+    }
+    return EVENT_NULL;
+  }
+  ArrayList getWidgets()
+  {
+    return screenWidgets;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Widget{
+  int x, y, width, height; String label; int event;
+  color widgetColor, labelColor, lineColor; PFont widgetFont;
+  Widget (int x, int y, int width, int height, String label, 
+  color widgetColor, PFont widgetFont, int event){
+    this.x = x; this.y = y; this.width = width; this.height = height;
+    this.label = label; this.event = event; 
+    this.widgetColor = widgetColor; this.widgetFont = widgetFont;
+    labelColor = color(0); lineColor = color(0);
+  }
+  void draw(){
+    fill (widgetColor); stroke (lineColor);
+    rect(x, y, width, height);
+    fill(labelColor);
+    text (label, x+10, y+height-10);
+    }
+    void mouseOver() {
+      lineColor = color(255);
+    }
+    void mouseNotOver() {
+      lineColor = color(0);
+    }
+    int getEvent(int mX, int mY){
+      if(mX>x && mX < x+width && mY >y && mY <y+height){
+    return event;
+    }
+    return EVENT_NULL;
+  }
+}
+
+class TextWidget extends Widget{
+int maxlen;
+TextWidget (int x, int y, int width, int height, String label,
+color widgetColor, PFont font, int event, int maxlen){
+  super (x, y, width, height, label, widgetColor, font, event);
+  this.x = x; this.y = y; this.width = width; this.height = height;
+  this.label = label; this.event = event; 
+  this.widgetColor = widgetColor; this.widgetFont = font;
+  labelColor = color(0); this.maxlen = maxlen;
+  }
+  void append(char s){
+    if (s==BACKSPACE){
+      if (!label.equals(""))
+      label = label.substring(0, label.length()-1);
+    }
+    else if (label.length() < maxlen)
+    label = label + str(s);
+  }
+}
+
+
 //====================VARIABLE CLASSES===========================
 class FlightDate{
   int year;
@@ -119,6 +234,7 @@ class Origin {
 
   String getAirportAndCity(){
     return airport + ", " + city;
+  }
 }
 
 // Classes Akira
@@ -194,3 +310,6 @@ class Distance {
 
 
 
+//test test akira 
+
+// test victoria
