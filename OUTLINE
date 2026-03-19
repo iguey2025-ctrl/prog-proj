@@ -2,23 +2,34 @@
 ArrayList widgetList;
 PFont stdFont;
 final int EVENT_BUTTON1=1;
-final int EVENT_BUTTON2=2;
+final int EVENT_FORWARD=2;
+final int EVENT_BUTTON2=3;
+final int EVENT_BACKWARD=4;
 final int EVENT_NULL=0;
+Screen currentScreen, screen1, screen2;
 void setup(){
-  Widget widget1,widget2;
+  Widget widgetEntryText,widgetDrawGraph;
   size(400,400);
-  stdFont=loadFont(); textFont(stdFont);
+  stdFont=loadFont("Chalkboard-30.vlw"); textFont(stdFont);
   widgetEntryText=new Widget(100,100,100,40,"Generate Entry Text", color(100), stdFont, EVENT_BUTTON1);
   widgetDrawGraph=new Widget(100,200,100,40,"Draw Graph",color(150), stdFont, EVENT_BUTTON2);
   widgetList = new ArrayList();
   widgetList.add(widgetEntryText); widgetList.add(widgetDrawGraph);
+
+screen1 = new Screen(color(255));
+screen2 = new Screen(color(150));
+screen1.add(widgetEntryText);
+screen1.add(widgetDrawGraph);
+currentScreen = screen1;
+
 }
 
 void draw(){
-  for(int i=0; i<widgetList.size(); i++){
-    Widget aWidget = (Widget) widgetList.get(i);
-    aWidget.draw();
-  }
+  currentScreen.draw();
+  // for(int i=0; i<widgetList.size(); i++){
+  //   Widget aWidget = (Widget) widgetList.get(i);
+  //   aWidget.draw();
+  // }
 
 }
 void mousePressed(){
@@ -26,7 +37,7 @@ void mousePressed(){
   for (int i=0;i<widgetList.size();i++){
       Widget aWidget = (Widget) widgetList.get(i);
       event = aWidget.getEvent(mouseX, mouseY);
-      switch(event){
+      switch(currentScreen.getEvent(mouseX, mouseY)){
         case EVENT_BUTTON1:
             println("button 1!");
             break;
