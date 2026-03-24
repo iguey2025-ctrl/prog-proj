@@ -11,10 +11,11 @@ Widget widgetEntryText;
 Widget widgetDrawGraph;
 
 int topN = 20;
-
+<<<<<<< HEAD
 // izzy test sync
+=======
 
-
+>>>>>>> 3ee4edc633b5798f1c8232dce0c6d519d0404bcf
 
 
 

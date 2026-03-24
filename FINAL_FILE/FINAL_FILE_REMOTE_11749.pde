@@ -12,9 +12,6 @@ Widget widgetDrawGraph;
 
 int topN = 20;
 
-// izzy test sync
-
-
 
 
 

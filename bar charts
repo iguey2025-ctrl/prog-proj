@@ -1,0 +1,242 @@
+//global variables
+ArrayList<Flight> flights;
+HashMap<String, Integer> results;
+
+ArrayList<Widget> widgetList;
+
+final int EVENT_AIRLINE = 1;
+final int EVENT_ORIGIN = 2;
+final int EVENT_NULL = 0;
+
+void setup() {
+  size(800, 600);
+  
+  flights = new ArrayList<Flight>();
+  widgetList = new ArrayList<Widget>();
+  
+  readData();
+  
+  // default view
+  results = countByAirline();
+  
+  // buttons
+  widgetList.add(new Widget(50, 20, 150, 40, "By Airline", color(200), EVENT_AIRLINE));
+  widgetList.add(new Widget(220, 20, 150, 40, "By Origin (Top 10)", color(180), EVENT_ORIGIN));
+}
+
+void draw() {
+  background(255);
+  
+  // draw buttons
+  for (Widget w : widgetList) {
+    w.draw();
+  }
+  
+  // draw chart
+  drawBarChart(results);
+}
+
+//mouse clicked
+void mousePressed() {
+  
+  for (Widget w : widgetList) {
+    int event = w.getEvent(mouseX, mouseY);
+    
+    switch(event) {
+      case EVENT_AIRLINE:
+        results = countByAirline();
+        println("Airline view");
+        break;
+        
+      case EVENT_ORIGIN:
+        results = countByOrigin();
+        println("Origin view (Top 10)");
+        break;
+    }
+  }
+}
+
+//hover effect
+void mouseMoved() {
+  
+  for (Widget w : widgetList) {
+    int event = w.getEvent(mouseX, mouseY);
+    
+    if (event != EVENT_NULL) {
+      w.mouseOver();
+    } else {
+      w.mouseNotOver();
+    }
+  }
+}
+
+//widget class
+class Widget {
+  int x, y, width, height;
+  String label;
+  int event;
+  
+  color widgetColor;
+  color lineColor;
+  
+  Widget(int x, int y, int width, int height, String label, color widgetColor, int event) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.label = label;
+    this.event = event;
+    this.widgetColor = widgetColor;
+    
+    lineColor = color(0);
+  }
+  
+  void draw() {
+    fill(widgetColor);
+    stroke(lineColor);
+    rect(x, y, width, height);
+    
+    fill(0);
+    text(label, x + 10, y + 25);
+  }
+  
+  int getEvent(int mX, int mY) {
+    if (mX > x && mX < x + width && mY > y && mY < y + height) {
+      return event;
+    }
+    return EVENT_NULL;
+  }
+  
+  void mouseOver() {
+    lineColor = color(255);
+  }
+  
+  void mouseNotOver() {
+    lineColor = color(0);
+  }
+}
+
+//flight class
+class Flight {
+  String airline;
+  String origin;
+  
+  Flight(String airline, String origin) {
+    this.airline = airline;
+    this.origin = origin;
+  }
+}
+
+//read data 
+void readData() {
+  String[] lines = loadStrings("flights_full (1).csv");
+  
+  for (int i = 1; i < lines.length; i++) {
+    String[] parts = split(lines[i], ',');
+    
+    if (parts.length > 5) {
+      String airline = parts[1];
+      String origin = parts[4];
+      
+      flights.add(new Flight(airline, origin));
+    }
+  }
+}
+
+//queries
+
+// flights per airline
+HashMap<String, Integer> countByAirline() {
+  HashMap<String, Integer> counts = new HashMap<String, Integer>();
+  
+  for (Flight f : flights) {
+    if (counts.containsKey(f.airline)) {
+      counts.put(f.airline, counts.get(f.airline) + 1);
+    } else {
+      counts.put(f.airline, 1);
+    }
+  }
+  
+  return counts;
+}
+
+// flights per origin
+HashMap<String, Integer> countByOrigin() {
+  HashMap<String, Integer> counts = new HashMap<String, Integer>();
+  
+  for (Flight f : flights) {
+    if (counts.containsKey(f.origin)) {
+      counts.put(f.origin, counts.get(f.origin) + 1);
+    } else {
+      counts.put(f.origin, 1);
+    }
+  }
+  
+  return counts;
+}
+
+//get top 
+ArrayList<String> getTopKeys(HashMap<String, Integer> data, int limit) {
+  
+  ArrayList<String> keys = new ArrayList<String>(data.keySet());
+  
+  // sort descending
+  keys.sort((a, b) -> data.get(b) - data.get(a));
+  
+  if (keys.size() > limit) {
+    return new ArrayList<String>(keys.subList(0, limit));
+  }
+  
+  return keys;
+}
+
+//bar chart 
+void drawBarChart(HashMap<String, Integer> data) {
+  
+  int margin = 80;
+  int chartHeight = 300;
+  int spacing = 10;
+  
+  ArrayList<String> keys = getTopKeys(data, 10);
+  
+  int numBars = keys.size();
+  int barWidth = (width - 2 * margin) / numBars - spacing;
+  
+  int maxVal = 0;
+  for (String key : keys) {
+    int val = data.get(key);
+    if (val > maxVal) {
+      maxVal = val;
+    }
+  }
+  
+  int i = 0;
+  
+  for (String key : keys) {
+    int value = data.get(key);
+    
+    float barHeight = map(value, 0, maxVal, 0, chartHeight);
+    
+    int x = margin + i * (barWidth + spacing);
+    int y = height - margin;
+    
+// bar
+    fill(100, 150, 255);
+    rect(x, y - barHeight, barWidth, barHeight);
+    
+// label 
+    fill(0);
+    textSize(10);
+    
+    pushMatrix();
+    translate(x, y + 15);
+    rotate(-PI/4);
+    text(key, 0, 0);
+    popMatrix();
+    
+// value
+    text(value, x, y - barHeight - 5);
+    
+    i++;
+  }
+}
