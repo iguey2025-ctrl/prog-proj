@@ -1,12 +1,17 @@
 TO DO
-- how to use processing in vscode
-- how to actually run code
-- what exactly do they mean by query 
+
 
 EXTENSION IDEAS
 - button to filter flights by airport, date range, lateness 
 - button to draw selected data 
 - options to change color + appearance of graphs 
 - hover over graph to see each entry point ????
+
+
+NEXT STEPS
+izzy: make dropdown menu
+akira: draw outline screens
+naz: make different graphs button (bar, scatter plot, pie chart, histogram)
+victoria: figure out how to manipulate csv file data (ie filtering, sorting, etc)
  
 
