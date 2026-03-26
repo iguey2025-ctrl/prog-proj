@@ -1,14 +1,29 @@
+import controlP5.*;
+ControlP5 cp5;
+
 ArrayList widgetList;
 PFont stdFont;
+PFont startFont;
+color bgColor = color(#489DC6);
+
 final int EVENT_BUTTON_QUERY=1;
 final int EVENT_BUTTON_DRAW=2;
+final int EVENT_BUTTON_ORIGIN=3;
+final int EVENT_BUTTON_DEST=4;
+final int EVENT_BUTTON_START =5;
 final int EVENT_NULL=0;
 Table flightData;
-Screen screen1;
+Screen startScreen;
+Screen mainScreen;
 Screen screen2;
+Screen airlineScreen;
+Screen destScreen;
+Screen originScreen;
+
 Screen currentScreen;
 Widget widgetEntryText;
 Widget widgetDrawGraph;
+Widget startButton;
 
 int topN = 20;
 
@@ -23,41 +38,95 @@ void setup(){
   size(1000,700);
   flightData = loadTable("flights2k.csv", "header");
   
+//DROPDOWN MENU
+  cp5 = new ControlP5(this);
+  DropdownList ddl = cp5.addDropdownList("sort by:")
+  .setPosition(100,600)
+  .setSize(100,1000)
+  .setBackgroundColor(color(100,100,100))
+  .setBarHeight(20);
+  
+  
+  ddl.addItem("airline", 1);
+  ddl.addItem("location", 2);
 
-
-
-  stdFont=loadFont("AppleBraille-Outline8Dot-48.vlw");
+  stdFont=loadFont("AppleBraille-Outline8Dot-12.vlw");
+  startFont=createFont("Flight21.ttf", 60);
+  textFont(startFont);
+  
+  Widget origin,destination;
+  origin=new Widget(100,100,100,40,"origin", color(#68D1EA),stdFont, EVENT_BUTTON_ORIGIN);
+  destination=new Widget(100,200,100,40,"destination", color(#68D1EA),stdFont, EVENT_BUTTON_DEST);
+  Widget titleButton = new Widget(180, 40, 700, 60, "(FLIGHT DATA VISUALIZER)", color(#DE2D44), startFont, EVENT_NULL);
   textFont(stdFont);
-  Widget widget1,widget2;
-  widgetEntryText=new Widget(100,100,100,40,"Generate Entry Text", color(100), stdFont, EVENT_BUTTON_QUERY);
-  widgetDrawGraph=new Widget(100,200,100,40,"Draw Graph",color(150), stdFont, EVENT_BUTTON_DRAW);
-  widgetList = new ArrayList();
-  widgetList.add(widgetEntryText); widgetList.add(widgetDrawGraph);
+  startButton = new Widget(700, 470, 100,50, "(Start)", color(#489DC6), startFont, EVENT_BUTTON_START);
+  widgetEntryText=new Widget(400,height/2,200,100,"Query", color(#68D1EA), stdFont, EVENT_BUTTON_QUERY);
+  widgetDrawGraph=new Widget(550,height/2,200,100,"Draw graph",color(#68D1EA), stdFont, EVENT_BUTTON_DRAW);
 
-  screen1 = new Screen(color(255));
+//=========SCREENS
+  mainScreen = new Screen(color(255));
   screen2 = new Screen(color(150));
-  screen1.add(widgetEntryText);
-  screen1.add(widgetDrawGraph);
-  currentScreen = screen1;
-  
-  
-  
+  destScreen = new Screen(color(150));
+  originScreen=new Screen(color(150));
+  startScreen = new Screen(color(#FAFAA9));
+  startScreen.add(startButton);
+  startScreen.add(titleButton);
+  mainScreen.add(widgetEntryText);
+  mainScreen.add(widgetDrawGraph);
+  destScreen.add(origin); destScreen.add(destination);
+  currentScreen = startScreen;
+   
+}
 
+void controlEvent(ControlEvent theEvent){
+  if(theEvent.isGroup()){
+    if(theEvent.getGroup().getName().equals("sort by:")){
+      if(theEvent.getValue() == 1){currentScreen=airlineScreen;}
+      else if(theEvent.getValue() == 1){currentScreen=destScreen;}
+       
+    
+      
+    }
+  }
 }
 
 
 void draw(){
+  currentScreen.draw();
   
-  text(flightData.getRowCount() + " total rows in table", 400,100);
-  
-  
-  drawBarGraph("ORIGIN_CITY_NAME");
-  drawBarGraph("ORIGIN");
-  drawBarGraph("MKT_CARRIER");
-  
-  
-
 }
+
+void mousePressed(){
+  int theEvent = currentScreen.getEvent();
+  
+  switch(theEvent){
+    case EVENT_BUTTON_ORIGIN:
+      currentScreen=originScreen;
+      break;
+    case EVENT_BUTTON_DEST:
+      currentScreen=destScreen;
+      break;
+    case EVENT_BUTTON_QUERY:
+      Widget example1 = new Widget(500,500,100,40,"figure out textWidget, replace this widget with text query", color(100), stdFont, EVENT_NULL);
+      currentScreen.add(example1);
+      break;
+    case EVENT_BUTTON_DRAW:
+      Widget example2 = new Widget(300,600,100,40,"replace this widget with graphs", color(100), stdFont, EVENT_NULL);
+      currentScreen.add(example2);
+      break;
+    case EVENT_BUTTON_START:
+      currentScreen=mainScreen;
+  }
+}
+
+
+
+
+
+
+
+
+
 
 //===================DRAWBARGRAPH FUNCTOIN======================
 void drawBarGraph(String columnName) {
@@ -155,7 +224,7 @@ class Widget{
     rect(x, y, width, height);
     fill(labelColor);
     text (label, x+10, y+height-10);
-    }
+  }
     void mouseOver() {
       lineColor = color(255);
     }
@@ -164,8 +233,8 @@ class Widget{
     }
     int getEvent(int mX, int mY){
       if(mX>x && mX < x+width && mY >y && mY <y+height){
-    return event;
-    }
+        return event;
+      }
     return EVENT_NULL;
   }
 }
@@ -253,7 +322,7 @@ class Screen {
     }
   }
 
-  int getEvent(int mx, int my){
+  int getEvent(){
     for(int i = 0; i<screenWidgets.size(); i++){
       Widget aWidget = (Widget) screenWidgets.get(i);
       int event = aWidget.getEvent(mouseX,mouseY);
