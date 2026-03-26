@@ -1,7 +1,7 @@
 TO DO
 - create different types of widgets so we can add them to screens bc screens only accept widgets
     - image widget, CP5 widget (for dropdown menu), textWidget (we alr have the class but doesnt
-      rly work), whatever else u can think of that we'd need
+      rly work), GRAPH AND CHART!!!!, whatever else u can think of that we'd need
 
 - figure out how to have multiple text sizes and fonts on one screen at a time bc
   the way we have it rn draws everything at once so all text gets grouped tgth
