@@ -12,6 +12,7 @@ final int EVENT_BUTTON_ORIGIN=3;
 final int EVENT_BUTTON_DEST=4;
 final int EVENT_BUTTON_START =5;
 final int EVENT_NULL=0;
+final int EVENT_BUTTON_EXIT =6;
 Table flightData;
 Screen startScreen;
 Screen mainScreen;
@@ -24,6 +25,9 @@ Screen currentScreen;
 Widget widgetEntryText;
 Widget widgetDrawGraph;
 Widget startButton;
+Screen introScreen;
+Widget introStartButton;
+Widget exitButton;
 
 int topN = 20;
 
@@ -69,12 +73,25 @@ void setup(){
   destScreen = new Screen(color(150));
   originScreen=new Screen(color(150));
   startScreen = new Screen(color(#FAFAA9));
+  
+  // ======== NEW INTRO SCREEN ========
+introScreen = new Screen(color(#A8D8FF));
+
+introStartButton = new Widget(400, 300, 200, 80, "START", color(#68D1EA), startFont, EVENT_BUTTON_START);
+exitButton = new Widget(400, 420, 200, 80, "EXIT", color(#DE2D44), startFont, EVENT_BUTTON_EXIT);
+
+introScreen.add(introStartButton);
+introScreen.add(exitButton);
+
+// Set this as the FIRST screen shown
+currentScreen = introScreen;
+// ============================================
+  
   startScreen.add(startButton);
   startScreen.add(titleButton);
   mainScreen.add(widgetEntryText);
   mainScreen.add(widgetDrawGraph);
   destScreen.add(origin); destScreen.add(destination);
-  currentScreen = startScreen;
    
 }
 
@@ -114,8 +131,17 @@ void mousePressed(){
       Widget example2 = new Widget(300,600,100,40,"replace this widget with graphs", color(100), stdFont, EVENT_NULL);
       currentScreen.add(example2);
       break;
-    case EVENT_BUTTON_START:
-      currentScreen=mainScreen;
+case EVENT_BUTTON_START:
+  if(currentScreen == introScreen){
+    currentScreen = startScreen; // go to your existing screen
+  } else {
+    currentScreen = mainScreen; // existing behavior
+  }
+  break;
+
+case EVENT_BUTTON_EXIT:
+  exit();
+  break;
   }
 }
 
