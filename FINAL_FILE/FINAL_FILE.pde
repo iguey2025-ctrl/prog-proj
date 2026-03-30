@@ -22,6 +22,7 @@ Screen introScreen;
 Screen startScreen;
 Screen mainScreen;
 Screen graphScreen;
+Screen selectionScreen;
 
 Screen currentScreen;
 Screen previousScreen;
@@ -36,6 +37,8 @@ Widget backButton;
 Widget buttonBar;
 Widget buttonScatter;
 Widget buttonPie;
+Widget selectAirlineButton;
+Widget selectAirportButton;
 
 TextWidget activeTextWidget = null;
 
@@ -61,6 +64,7 @@ void setup(){
   stdFont = createFont("Arial", 14);
   startFont = createFont("Arial", 40);
   textFont(stdFont);
+  backButton = new Widget(20,20,100,40,"Back",color(#FF6B6B),stdFont,EVENT_BUTTON_BACK);
 
 // ===== INTRO SCREEN =====
   introScreen = new Screen(color(#A8D8FF));
@@ -75,6 +79,16 @@ void setup(){
   startScreen = new Screen(color(#FAFAA9));
   startButton = new Widget(400,400,200,80,"ENTER",color(#489DC6),stdFont,EVENT_BUTTON_START);
   startScreen.add(startButton);
+// ===== SELECTION SCREEN =====
+selectionScreen = new Screen(color(#CFF5E7));
+
+selectAirlineButton = new Widget(350,250,300,80,"Select Airline",color(#68D1EA),stdFont,20);
+selectAirportButton = new Widget(350,370,300,80,"Select Airport",color(#68D1EA),stdFont,21);
+
+// reuse existing back button
+selectionScreen.add(selectAirlineButton);
+selectionScreen.add(selectAirportButton);
+selectionScreen.add(backButton);
 
 // ===== MAIN SCREEN =====
   mainScreen = new Screen(color(255));
@@ -85,8 +99,7 @@ void setup(){
   buttonBar = new Widget(40,120,180,50,"Bar Chart",color(120),stdFont,EVENT_BAR);
   buttonScatter = new Widget(40,190,180,50,"Scatter",color(140),stdFont,EVENT_SCATTER);
   buttonPie = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE);
-
-  backButton = new Widget(20,20,100,40,"Back",color(#FF6B6B),stdFont,EVENT_BUTTON_BACK);
+ 
 
   mainScreen.add(widgetEntryText);
   mainScreen.add(widgetDrawGraph);
@@ -142,13 +155,27 @@ void mousePressed(){
 
   switch(theEvent){
 
-    case EVENT_BUTTON_START:
-      if(currentScreen == introScreen){
-        switchScreen(startScreen);
-      } else {
-        switchScreen(mainScreen);
-      }
-      break;
+case EVENT_BUTTON_START:
+  if(currentScreen == introScreen){
+    switchScreen(startScreen);
+  } 
+  else if(currentScreen == startScreen){
+    switchScreen(selectionScreen);   // NEW STEP
+  } 
+  else if(currentScreen == selectionScreen){
+    switchScreen(mainScreen);
+  }
+  break;
+
+case 20: // Select Airline
+  selectedColumn = "AIRLINE";  
+  switchScreen(mainScreen);
+  break;
+
+case 21: // Select Airport
+  selectedColumn = "ORIGIN";   
+  switchScreen(mainScreen);
+  break;
 
 //draw graph button
     case EVENT_BUTTON_DRAW:
