@@ -13,6 +13,9 @@ final int EVENT_BUTTON_DEST=4;
 final int EVENT_BUTTON_START =5;
 final int EVENT_NULL=0;
 final int EVENT_BUTTON_EXIT =6;
+final int EVENT_BUTTON_SELECT_AIRLINE = 7;
+final int EVENT_BUTTON_SELECT_AIRPORT = 8;
+final int EVENT_BUTTON_BACK = 9;
 Table flightData;
 Screen startScreen;
 Screen mainScreen;
@@ -20,6 +23,12 @@ Screen screen2;
 Screen airlineScreen;
 Screen destScreen;
 Screen originScreen;
+Screen selectionScreen;
+
+Widget selectAirlineButton;
+Widget selectAirportButton;
+Widget backButton;
+
 
 Screen currentScreen;
 Widget widgetEntryText;
@@ -29,6 +38,7 @@ Screen introScreen;
 Widget introStartButton;
 Widget exitButton;
 
+Screen airportScreen;
 int topN = 20;
 
 // izzy test sync
@@ -73,6 +83,18 @@ void setup(){
   destScreen = new Screen(color(150));
   originScreen=new Screen(color(150));
   startScreen = new Screen(color(#FAFAA9));
+  airportScreen = new Screen(color(#FFDADA));
+  selectionScreen = new Screen(color(#CDEEFF));
+
+selectAirlineButton = new Widget(350, 250, 300, 70, "Select Airline", color(#68D1EA), stdFont, EVENT_BUTTON_SELECT_AIRLINE);
+
+selectAirportButton = new Widget(350, 350, 300, 70, "Select Airport", color(#68D1EA), stdFont, EVENT_BUTTON_SELECT_AIRPORT);
+
+backButton = new Widget(20, 20, 100, 40, "Back", color(#DE2D44), stdFont, EVENT_BUTTON_BACK);
+
+selectionScreen.add(selectAirlineButton);
+selectionScreen.add(selectAirportButton);
+selectionScreen.add(backButton);
   
   // ======== NEW INTRO SCREEN ========
 introScreen = new Screen(color(#A8D8FF));
@@ -133,10 +155,19 @@ void mousePressed(){
       break;
 case EVENT_BUTTON_START:
   if(currentScreen == introScreen){
-    currentScreen = startScreen; // go to your existing screen
-  } else {
-    currentScreen = mainScreen; // existing behavior
+    currentScreen = selectionScreen;
+  } 
+  else if(currentScreen == startScreen){
+    currentScreen = startScreen; // NEW STEP
+  } 
+  else {
+    currentScreen = mainScreen;
   }
+  break;
+
+
+case EVENT_BUTTON_BACK:
+  currentScreen = introScreen;
   break;
 
 case EVENT_BUTTON_EXIT:
