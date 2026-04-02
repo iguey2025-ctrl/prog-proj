@@ -19,7 +19,6 @@ final int EVENT_NULL=0;
 Table flightData;
 
 Screen introScreen;
-Screen startScreen;
 Screen mainScreen;
 Screen graphScreen;
 Screen selectionScreen;
@@ -60,6 +59,7 @@ void setup(){
 
   ddl.addItem("airline", 1);
   ddl.addItem("location", 2);
+  ddl.addItem("destination", 3);
 
   stdFont = createFont("Arial", 14);
   startFont = createFont("Arial", 40);
@@ -75,10 +75,7 @@ void setup(){
   introScreen.add(introStartButton);
   introScreen.add(exitButton);
 
-// ===== START SCREEN =====
-  startScreen = new Screen(color(#FAFAA9));
-  startButton = new Widget(400,400,200,80,"ENTER",color(#489DC6),stdFont,EVENT_BUTTON_START);
-  startScreen.add(startButton);
+  
 // ===== SELECTION SCREEN =====
 selectionScreen = new Screen(color(#CFF5E7));
 
@@ -157,10 +154,7 @@ void mousePressed(){
 
 case EVENT_BUTTON_START:
   if(currentScreen == introScreen){
-    switchScreen(startScreen);
-  } 
-  else if(currentScreen == startScreen){
-    switchScreen(selectionScreen);   // NEW STEP
+    switchScreen(selectionScreen);
   } 
   else if(currentScreen == selectionScreen){
     switchScreen(mainScreen);
