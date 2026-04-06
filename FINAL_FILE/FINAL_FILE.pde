@@ -13,7 +13,7 @@ final int EVENT_BUTTON_EXIT =7;
 
 final int EVENT_BAR = 10;
 final int EVENT_SCATTER = 11;
-final int EVENT_PIE = 12;
+final int EVENT_PIE_CANCELLED = 12;
 final int EVENT_PIE_DISTANCE = 13;
 final int EVENT_NULL=0;
 
@@ -36,7 +36,7 @@ Widget backButton;
 
 Widget buttonBar;
 Widget buttonScatter;
-Widget buttonPie;
+Widget buttonPieCancelled;
 Widget buttonPieDist;
 Widget selectAirlineButton;
 Widget selectAirportButton;
@@ -48,9 +48,12 @@ String selectedColumn = "";
 int graphType = EVENT_BAR;
 
 ArrayList<String> airlines = new ArrayList<String>();
-String selectedAirline;
-int[] counts;
-Widget[] airlineButtons;
+String selectedAirlineDist;
+String selectedAirlineCancelled;
+int[] countsDist;
+int[] countsCancelled;
+Widget[] airlineButtonsDist;
+Widget[] airlineButtonsCancelled;
 
 void setup(){
   size(1000,700);
@@ -70,7 +73,7 @@ void setup(){
 
   stdFont = createFont("Arial", 14);
   startFont = createFont("Arial", 40);
-  smallFont = loadFont("AppleSDGothicNeo-Light-20.vlw");
+  //smallFont = loadFont("AppleSDGothicNeo-Light-20.vlw");
   textFont(stdFont);
   backButton = new Widget(20,20,100,40,"Back",color(#FF6B6B),stdFont,EVENT_BUTTON_BACK);
 
@@ -103,7 +106,7 @@ selectionScreen.add(backButton);
 
   buttonBar = new Widget(40,120,180,50,"Bar Chart",color(120),stdFont,EVENT_BAR);
   buttonScatter = new Widget(40,190,180,50,"Scatter",color(140),stdFont,EVENT_SCATTER);
-  buttonPie = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE);
+  buttonPieCancelled = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE_CANCELLED);
   buttonPieDist = new Widget(40,330,180,50,"Pie Chart Dist",color(160),stdFont,EVENT_PIE_DISTANCE);
 
 
@@ -111,7 +114,7 @@ selectionScreen.add(backButton);
   mainScreen.add(widgetDrawGraph);
   mainScreen.add(buttonBar);
   mainScreen.add(buttonScatter);
-  mainScreen.add(buttonPie);
+  mainScreen.add(buttonPieCancelled);
   mainScreen.add(buttonPieDist);
   mainScreen.add(backButton);
 
@@ -130,19 +133,39 @@ selectionScreen.add(backButton);
     }
   }
   
-  selectedAirline = airlines.get(0);
-  counts = queryAirlineDistances(selectedAirline);
+  selectedAirlineDist = airlines.get(0);
+  selectedAirlineCancelled = airlines.get(0);
+  countsDist = queryAirlineDistances(selectedAirlineDist);
+  countsCancelled = queryCancelledByAirport(selectedAirlineCancelled);
   
-    // === CREATE BUTTONS AIRLINES ===
+    // === CREATE BUTTONS AIRLINES DISTANCES ===
   int n = min(10, airlines.size());
-  airlineButtons = new Widget[n];
+  airlineButtonsDist = new Widget[n];
   
   for (int i = 0; i < n; i++) {
-    airlineButtons[i] = new Widget(
+    airlineButtonsDist[i] = new Widget(
       30, 
       80 + i * 50, 
-      180, 
-      50, 
+      100, 
+      40, 
+      airlines.get(i), 
+      color(120), 
+      stdFont, 
+      100 + i
+    );
+  }
+  
+  
+  
+    // === CREATE BUTTONS AIRLINES CANCELLED ===
+  airlineButtonsCancelled = new Widget[n];
+  
+  for (int i = 0; i < n; i++) {
+    airlineButtonsCancelled[i] = new Widget(
+      30, 
+      80 + i * 50, 
+      100, 
+      40, 
       airlines.get(i), 
       color(120), 
       stdFont, 
@@ -164,12 +187,13 @@ void draw(){
     else if(graphType == EVENT_SCATTER){
       drawScatterPlot(selectedColumn);
     }
-    else if(graphType == EVENT_PIE){
-      drawPieChart();
+    else if(graphType == EVENT_PIE_CANCELLED){
+      drawPieChartCancelled();
+      drawAirlineButtonsCancelled();
     }
     else if(graphType == EVENT_PIE_DISTANCE){
       drawPieChartDistances();
-      drawAirlineButtons();
+      drawAirlineButtonsDist();
     }
   }
 }
@@ -197,16 +221,25 @@ void mousePressed(){
   int theEvent = currentScreen.getEvent();
   
   
-  // ===== AIRLINE BUTTON CLICK =====
-  if(graphType == EVENT_PIE_DISTANCE && airlineButtons != null){
-    for (int i = 0; i < airlineButtons.length; i++) {
-      if(airlineButtons[i].getEvent(mouseX, mouseY) != EVENT_NULL){
-        selectedAirline = airlines.get(i);
-        counts = queryAirlineDistances(selectedAirline);
+  // ===== AIRLINE DISTANCE BUTTON CLICK =====
+  if(graphType == EVENT_PIE_DISTANCE && airlineButtonsDist != null){
+    for (int i = 0; i < airlineButtonsDist.length; i++) {
+      if(airlineButtonsDist[i].getEvent(mouseX, mouseY) != EVENT_NULL){
+        selectedAirlineDist = airlines.get(i);
+        countsDist = queryAirlineDistances(selectedAirlineDist);
       }
     }
   }
-
+  
+  // ===== AIRLINE CANCELLED BUTTON CLICK =====
+  if(graphType == EVENT_PIE_CANCELLED && airlineButtonsCancelled != null){
+    for (int i = 0; i < airlineButtonsCancelled.length; i++) {
+      if(airlineButtonsCancelled[i].getEvent(mouseX, mouseY) != EVENT_NULL){
+        selectedAirlineCancelled = airlines.get(i);
+        countsCancelled = queryCancelledByAirport(selectedAirlineCancelled);
+      }
+    }
+  }
 
   switch(theEvent){
 
@@ -260,8 +293,8 @@ case 21: // Select Airport
       switchScreen(graphScreen);
       break;
 
-    case EVENT_PIE:
-      graphType = EVENT_PIE;
+    case EVENT_PIE_CANCELLED:
+      graphType = EVENT_PIE_CANCELLED;
       switchScreen(graphScreen);
       break;
       
@@ -356,17 +389,39 @@ void drawBarGraph(String columnName) {
   text("Carrier Frequency", marginL + chartW/2, 30);
 }
 
-//=================== PIE CHART ======================
-void drawPieChart() {
-
-  int cancelled = 0;
-  int notCancelled = 0;
-
-  //counts cancelled/not cancelled
+// ======= QUERY CANCELLED FLIGHTS ===========
+int[] queryCancelledByAirport(String airport) {
+  int[] counts = new int[2]; 
   for (TableRow row : flightData.rows()) {
-    if (row.getInt("CANCELLED") == 1) cancelled++;
-    else notCancelled++;
+    if (row.getString("MKT_CARRIER").equals(airport)) {
+      if (row.getInt("CANCELLED") == 1) counts[0]++;
+      else counts[1]++;
+    }
   }
+  return counts;
+}
+
+void drawAirlineButtonsCancelled() {
+  if(airlineButtonsCancelled == null) return;
+  for (Widget w : airlineButtonsCancelled) {
+    w.draw();
+  }
+}
+//=================== PIE CHART SUCCESSFUL FLIGHTS ======================
+void drawPieChartCancelled() {
+
+  //int cancelled = 0;
+  //int notCancelled = 0;
+
+  ////counts cancelled/not cancelled
+  //for (TableRow row : flightData.rows()) {
+  //  if (row.getInt("CANCELLED") == 1) cancelled++;
+  //  else notCancelled++;
+  //}
+  
+  
+  int cancelled = countsCancelled[0];
+  int notCancelled = countsCancelled[1];
 
   float total = cancelled + notCancelled;
   float angle = map(cancelled, 0, total, 0, TWO_PI);
@@ -456,22 +511,22 @@ int[] queryAirlineDistances(String airline) {
   return buckets;
 }
 
-void drawAirlineButtons() {
-  if(airlineButtons == null) return;
-  for (Widget w : airlineButtons) {
+void drawAirlineButtonsDist() {
+  if(airlineButtonsDist == null) return;
+  for (Widget w : airlineButtonsDist) {
     w.draw();
   }
 }
 
 // =======  DRAWING PIE CHART DISTANCES   ====
 void drawPieChartDistances() {
-  if (counts == null) return;
+  if (countsDist == null) return;
 
   float diameter = 400;
   float lastAngle = 0;
   int total = 0;
 
-  for (int c : counts) total += c;
+  for (int c : countsDist) total += c;
 
   color[] palette = {
     color(227, 59, 84), 
@@ -480,8 +535,8 @@ void drawPieChartDistances() {
     color(103, 214, 183)
   };
 
-  for (int i = 0; i < counts.length; i++) {
-    float angle = map(counts[i], 0, total, 0, TWO_PI);
+  for (int i = 0; i < countsDist.length; i++) {
+    float angle = map(countsDist[i], 0, total, 0, TWO_PI);
 
     fill(palette[i]);
     arc(550, 350, diameter, diameter, lastAngle, lastAngle + angle);
@@ -492,9 +547,9 @@ void drawPieChartDistances() {
   // title
   fill(0);
   textAlign(LEFT);
-  text("Airline: " + selectedAirline, 600, 80);
+  text("Airline: " + selectedAirlineDist, 600, 80);
   
-  textFont(smallFont);
+  //textFont(smallFont);
   fill(227, 59, 84);
   rect(700, 520, 25, 25);
   text("to 1000 km", 740, 540);
@@ -588,69 +643,6 @@ class TextWidget extends Widget {
   }
 }
 
-
-class DataPoint {
-  /*FlightDate flightDate;
-   IATA_Code_Marketing_Airline IATACode;
-   Flight_Number_Marketing_Airline flightNumber;
-   Origin origin;
-   OriginState originState;
-   OriginWac originWac;
-   Dest dest;
-   DestCityName destCityName; */
-  DestState destState;
-  DestWac destWac;
-  CRSDepTime crsDep;
-  DepTime depTime;
-  CRSArrTime crsArr;
-  ArrTime arrTime;
-  CancelledFlight cancFlight;
-  DivertedFlight divFlight;
-  Distance dist;
-
-  /* FlightDate getFlightDate(){return flightDate;}
-   IATA_Code_Marketing_Airline getIATA(){return IATACode;}
-   Flight_Number_Marketing_Airline getFlightNumber(){return flightNumber;}
-   Origin getOrigin(){return origin;}
-   OriginState getOriginState(){return originState;}
-   OriginWac getOriginWac(){return originWac;}
-   Dest getDest(){return dest;}
-   DestCityName getDestCityName(){return destCityName;}  */
-  DestState getDestState() {
-    return destState;
-  }
-  DestWac getDestWac() {
-    return destWac;
-  }
-  CRSDepTime getCrsDep() {
-    return crsDep;
-  }
-  DepTime getDepTime() {
-    return depTime;
-  }
-  CRSArrTime getCrsArr() {
-    return crsArr;
-  }
-  ArrTime getArrTime() {
-    return arrTime;
-  }
-  CancelledFlight getCancFlight() {
-    return cancFlight;
-  }
-  DivertedFlight getDivFlight() {
-    return divFlight;
-  }
-  Distance getDist() {
-    return dist;
-  }
-  /*
-  String getFlightCode(){
-   return IATACode + flightNumber;
-   }
-   */
-}
-
-
 // ================= SCREEN =================
 class Screen {
   ArrayList screenWidgets;
@@ -687,101 +679,4 @@ class Screen {
   ArrayList getWidgets() {
     return screenWidgets;
   }
-}
-
-class FlightDate {
-  int year;
-  int month;
-  int day;
-}
-
-class IATACodeMarketingAirline {
-  String airlineCode;
-
-  String getCode() {
-    return airlineCode;
-  }
-}
-
-class FlightNumberMarketingAirline {
-  int flightNumber;
-
-  /*  String getNumber(){
-   return flightNumber;
-   }
-   
-   */
-}
-
-class Origin {
-  String airport;
-  String city;
-
-  String getAirportAndCity() {
-    return airport + ", " + city;
-  }
-}
-
-// Classes Akira
-class originState {
-  String originAirport;
-  String stateCode;
-}
-
-class originWAC {
-  String originAirport;
-  int worldAreaCode;
-}
-
-class destination {
-  String destinationAirport;
-}
-
-class destinationCityName {
-  String destinationAirport;
-  String cityName;
-}
-
-
-// classes Naz
-class DestState {
-  String destinationAirport;
-  String stateCode;
-}
-
-class DestWac {
-  String destinationAirport;
-  int wac;
-}
-
-class CRSDepTime {
-  int hour;
-  int minute;
-}
-
-class DepTime {
-  int hour;
-  int minute;
-}
-
-class CRSArrTime {
-  int hour;
-  int minute;
-}
-
-class ArrTime {
-  int hour;
-  int minute;
-}
-
-class CancelledFlight {
-  boolean cancelled;
-}
-
-class DivertedFlight {
-  boolean diverted;
-}
-
-class Distance {
-  int distance;
 }
