@@ -3,6 +3,7 @@ ControlP5 cp5;
 
 PFont stdFont;
 PFont startFont;
+PFont smallFont;
 
 final int EVENT_BUTTON_QUERY=1;
 final int EVENT_BUTTON_DRAW=2;
@@ -69,6 +70,7 @@ void setup(){
 
   stdFont = createFont("Arial", 14);
   startFont = createFont("Arial", 40);
+  smallFont = loadFont("AppleSDGothicNeo-Light-20.vlw");
   textFont(stdFont);
   backButton = new Widget(20,20,100,40,"Back",color(#FF6B6B),stdFont,EVENT_BUTTON_BACK);
 
@@ -131,14 +133,14 @@ selectionScreen.add(backButton);
   selectedAirline = airlines.get(0);
   counts = queryAirlineDistances(selectedAirline);
   
-  // === CREATE BUTTONS AIRLINES ===
+    // === CREATE BUTTONS AIRLINES ===
   int n = min(10, airlines.size());
   airlineButtons = new Widget[n];
   
   for (int i = 0; i < n; i++) {
     airlineButtons[i] = new Widget(
       30, 
-      30 + i * 60, 
+      80 + i * 50, 
       180, 
       50, 
       airlines.get(i), 
@@ -146,8 +148,8 @@ selectionScreen.add(backButton);
       stdFont, 
       100 + i
     );
-    graphScreen.add(airlineButtons[i]);
   }
+ 
 }
 
 void draw(){
@@ -157,14 +159,17 @@ void draw(){
     if(graphType == EVENT_BAR && selectedColumn != ""){
       drawBarGraph(selectedColumn);
     }
+    //else if(graphType == EVENT_SCATTER){
+    //  drawScatterPlot(activeTextWidget.getLabel());
     else if(graphType == EVENT_SCATTER){
-      drawScatterPlot(activeTextWidget.getLabel());
+      drawScatterPlot(selectedColumn);
     }
     else if(graphType == EVENT_PIE){
       drawPieChart();
     }
     else if(graphType == EVENT_PIE_DISTANCE){
       drawPieChartDistances();
+      drawAirlineButtons();
     }
   }
 }
@@ -179,7 +184,7 @@ void mousePressed(){
 
   activeTextWidget = null;
 
-//check if text box was clicked
+////check if text box was clicked
   for (Object w : currentScreen.getWidgets()) {
     if (w instanceof TextWidget) {
       TextWidget tw = (TextWidget) w;
@@ -193,10 +198,13 @@ void mousePressed(){
   
   
   // ===== AIRLINE BUTTON CLICK =====
-  if (theEvent >= 100 && theEvent < 100 + airlineButtons.length) {
-    int index = theEvent - 100;
-    selectedAirline = airlines.get(index);
-    counts = queryAirlineDistances(selectedAirline);
+  if(graphType == EVENT_PIE_DISTANCE && airlineButtons != null){
+    for (int i = 0; i < airlineButtons.length; i++) {
+      if(airlineButtons[i].getEvent(mouseX, mouseY) != EVENT_NULL){
+        selectedAirline = airlines.get(i);
+        counts = queryAirlineDistances(selectedAirline);
+      }
+    }
   }
 
 
@@ -249,14 +257,17 @@ case 21: // Select Airport
 
     case EVENT_SCATTER:
       graphType = EVENT_SCATTER;
+      switchScreen(graphScreen);
       break;
 
     case EVENT_PIE:
       graphType = EVENT_PIE;
+      switchScreen(graphScreen);
       break;
       
     case EVENT_PIE_DISTANCE:
       graphType = EVENT_PIE_DISTANCE;
+      switchScreen(graphScreen);
       break;
   }
 }
@@ -445,6 +456,13 @@ int[] queryAirlineDistances(String airline) {
   return buckets;
 }
 
+void drawAirlineButtons() {
+  if(airlineButtons == null) return;
+  for (Widget w : airlineButtons) {
+    w.draw();
+  }
+}
+
 // =======  DRAWING PIE CHART DISTANCES   ====
 void drawPieChartDistances() {
   if (counts == null) return;
@@ -466,15 +484,32 @@ void drawPieChartDistances() {
     float angle = map(counts[i], 0, total, 0, TWO_PI);
 
     fill(palette[i]);
-    arc(600, 350, diameter, diameter, lastAngle, lastAngle + angle);
+    arc(550, 350, diameter, diameter, lastAngle, lastAngle + angle);
 
     lastAngle += angle;
   }
 
   // title
-  fill(255);
-  textAlign(CENTER);
+  fill(0);
+  textAlign(LEFT);
   text("Airline: " + selectedAirline, 600, 80);
+  
+  textFont(smallFont);
+  fill(227, 59, 84);
+  rect(700, 520, 25, 25);
+  text("to 1000 km", 740, 540);
+  
+  fill(235, 163, 63); 
+  rect(700, 555, 25, 25);
+  text("1000 to 2000 km", 740, 575);
+
+  fill(138, 106, 217); 
+  rect(700, 590, 25, 25);
+  text("2000 to 3000 km", 740, 610);
+
+  fill(103, 214, 183);
+  rect(700, 625, 25, 25);
+  text("3000+ km", 740, 645);
 }
 
 
