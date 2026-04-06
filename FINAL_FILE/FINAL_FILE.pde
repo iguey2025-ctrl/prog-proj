@@ -16,16 +16,19 @@ final int EVENT_SCATTER = 11;
 final int EVENT_PIE_CANCELLED = 12;
 final int EVENT_PIE_DISTANCE = 13;
 final int EVENT_NULL=0;
+final int EVENT_PIE_CITY_DIST = 21;
 
 Table flightData;
 
 Screen introScreen;
-Screen mainScreen;
+Screen AirlineScreen;
+Screen AirportScreen;
 Screen graphScreen;
 Screen selectionScreen;
 
 Screen currentScreen;
-Screen previousScreen;
+//Screen previousScreen;
+ArrayList<Screen> screenHistory = new ArrayList<Screen>();
 
 TextWidget widgetEntryText;
 Widget widgetDrawGraph;
@@ -40,7 +43,7 @@ Widget buttonPieCancelled;
 Widget buttonPieDist;
 Widget selectAirlineButton;
 Widget selectAirportButton;
-
+Widget buttonPieCityDist;
 TextWidget activeTextWidget = null;
 
 int topN = 20;
@@ -98,8 +101,8 @@ selectionScreen.add(selectAirlineButton);
 selectionScreen.add(selectAirportButton);
 selectionScreen.add(backButton);
 
-// ===== MAIN SCREEN =====
-  mainScreen = new Screen(color(255));
+// ===== AIRLINE SCREEN =====
+  AirlineScreen = new Screen(color(255));
 
   widgetEntryText = new TextWidget(350,200,300,50,"",color(#68D1EA),stdFont,EVENT_BUTTON_QUERY,20);
   widgetDrawGraph = new Widget(400,300,200,60,"Draw Graph",color(#68D1EA),stdFont,EVENT_BUTTON_DRAW);
@@ -110,13 +113,22 @@ selectionScreen.add(backButton);
   buttonPieDist = new Widget(40,330,180,50,"Pie Chart Dist",color(160),stdFont,EVENT_PIE_DISTANCE);
 
 
-  mainScreen.add(widgetEntryText);
-  mainScreen.add(widgetDrawGraph);
-  mainScreen.add(buttonBar);
-  mainScreen.add(buttonScatter);
-  mainScreen.add(buttonPieCancelled);
-  mainScreen.add(buttonPieDist);
-  mainScreen.add(backButton);
+  AirlineScreen.add(widgetEntryText);
+  AirlineScreen.add(widgetDrawGraph);
+  AirlineScreen.add(buttonBar);
+  AirlineScreen.add(buttonScatter);
+  AirlineScreen.add(buttonPieCancelled);
+  AirlineScreen.add(buttonPieDist);
+  AirlineScreen.add(backButton);
+
+// ===== AIRPORT SCREEN =====
+  AirportScreen = new Screen(color(255));
+
+  buttonPieCityDist = new Widget(40,120,180,50,"Dist from airport city",color(120),stdFont,EVENT_PIE_CITY_DIST);
+
+  AirportScreen.add(buttonPieCityDist);
+  AirportScreen.add(backButton);
+
 
 // ===== GRAPH SCREEN =====
   graphScreen = new Screen(color(255));
@@ -200,7 +212,9 @@ void draw(){
 
 //screen switching
 void switchScreen(Screen newScreen){
-  previousScreen = currentScreen;
+  if(currentScreen != null){
+    screenHistory.add(currentScreen); // додаємо в історію
+  }
   currentScreen = newScreen;
 }
 
@@ -248,18 +262,18 @@ case EVENT_BUTTON_START:
     switchScreen(selectionScreen);
   } 
   else if(currentScreen == selectionScreen){
-    switchScreen(mainScreen);
+    switchScreen(AirlineScreen);
   }
   break;
 
 case 20: // Select Airline
   selectedColumn = "AIRLINE";  
-  switchScreen(mainScreen);
+  switchScreen(AirlineScreen);
   break;
 
 case 21: // Select Airport
   selectedColumn = "ORIGIN";   
-  switchScreen(mainScreen);
+  switchScreen(AirportScreen);
   break;
 
 //draw graph button
@@ -272,10 +286,9 @@ case 21: // Select Airport
 
 //back button
     case EVENT_BUTTON_BACK:
-      if(previousScreen != null){
-        Screen temp = currentScreen;
-        currentScreen = previousScreen;
-        previousScreen = temp;
+      if(screenHistory.size() > 0){
+        currentScreen = screenHistory.get(screenHistory.size() - 1);
+        screenHistory.remove(screenHistory.size() - 1);
       }
       break;
 
@@ -409,17 +422,6 @@ void drawAirlineButtonsCancelled() {
 }
 //=================== PIE CHART SUCCESSFUL FLIGHTS ======================
 void drawPieChartCancelled() {
-
-  //int cancelled = 0;
-  //int notCancelled = 0;
-
-  ////counts cancelled/not cancelled
-  //for (TableRow row : flightData.rows()) {
-  //  if (row.getInt("CANCELLED") == 1) cancelled++;
-  //  else notCancelled++;
-  //}
-  
-  
   int cancelled = countsCancelled[0];
   int notCancelled = countsCancelled[1];
 
