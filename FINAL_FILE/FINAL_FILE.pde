@@ -13,7 +13,7 @@ final int EVENT_BUTTON_EXIT =7;
 final int EVENT_BAR = 10;
 final int EVENT_SCATTER = 11;
 final int EVENT_PIE = 12;
-
+final int EVENT_PIE_DISTANCE = 13;
 final int EVENT_NULL=0;
 
 Table flightData;
@@ -36,6 +36,7 @@ Widget backButton;
 Widget buttonBar;
 Widget buttonScatter;
 Widget buttonPie;
+Widget buttonPieDist;
 Widget selectAirlineButton;
 Widget selectAirportButton;
 
@@ -44,6 +45,11 @@ TextWidget activeTextWidget = null;
 int topN = 20;
 String selectedColumn = "";
 int graphType = EVENT_BAR;
+
+ArrayList<String> airlines = new ArrayList<String>();
+String selectedAirline;
+int[] counts;
+Widget[] airlineButtons;
 
 void setup(){
   size(1000,700);
@@ -96,13 +102,15 @@ selectionScreen.add(backButton);
   buttonBar = new Widget(40,120,180,50,"Bar Chart",color(120),stdFont,EVENT_BAR);
   buttonScatter = new Widget(40,190,180,50,"Scatter",color(140),stdFont,EVENT_SCATTER);
   buttonPie = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE);
- 
+  buttonPieDist = new Widget(40,330,180,50,"Pie Chart Dist",color(160),stdFont,EVENT_PIE_DISTANCE);
+
 
   mainScreen.add(widgetEntryText);
   mainScreen.add(widgetDrawGraph);
   mainScreen.add(buttonBar);
   mainScreen.add(buttonScatter);
   mainScreen.add(buttonPie);
+  mainScreen.add(buttonPieDist);
   mainScreen.add(backButton);
 
 // ===== GRAPH SCREEN =====
@@ -110,6 +118,36 @@ selectionScreen.add(backButton);
   graphScreen.add(backButton);
 
   currentScreen = introScreen;
+
+
+  // === GET AIRLINES ===
+  for (TableRow row : flightData.rows()) {
+    String name = row.getString("MKT_CARRIER");
+    if (name != null && !name.equals("") && !airlines.contains(name)) {
+      airlines.add(name);
+    }
+  }
+  
+  selectedAirline = airlines.get(0);
+  counts = queryAirlineDistances(selectedAirline);
+  
+  // === CREATE BUTTONS AIRLINES ===
+  int n = min(10, airlines.size());
+  airlineButtons = new Widget[n];
+  
+  for (int i = 0; i < n; i++) {
+    airlineButtons[i] = new Widget(
+      30, 
+      30 + i * 60, 
+      180, 
+      50, 
+      airlines.get(i), 
+      color(120), 
+      stdFont, 
+      100 + i
+    );
+    graphScreen.add(airlineButtons[i]);
+  }
 }
 
 void draw(){
@@ -124,6 +162,9 @@ void draw(){
     }
     else if(graphType == EVENT_PIE){
       drawPieChart();
+    }
+    else if(graphType == EVENT_PIE_DISTANCE){
+      drawPieChartDistances();
     }
   }
 }
@@ -149,6 +190,15 @@ void mousePressed(){
   }
 
   int theEvent = currentScreen.getEvent();
+  
+  
+  // ===== AIRLINE BUTTON CLICK =====
+  if (theEvent >= 100 && theEvent < 100 + airlineButtons.length) {
+    int index = theEvent - 100;
+    selectedAirline = airlines.get(index);
+    counts = queryAirlineDistances(selectedAirline);
+  }
+
 
   switch(theEvent){
 
@@ -203,6 +253,10 @@ case 21: // Select Airport
 
     case EVENT_PIE:
       graphType = EVENT_PIE;
+      break;
+      
+    case EVENT_PIE_DISTANCE:
+      graphType = EVENT_PIE_DISTANCE;
       break;
   }
 }
@@ -368,6 +422,61 @@ void drawScatterPlot(String input) {
   text(input, 10, 220);
   popMatrix();
 }
+
+
+// ======== QUERY AIRLENE DISTANCES PIE CHART ==========
+int[] queryAirlineDistances(String airline) {
+  int[] buckets = new int[4];
+
+  for (TableRow row : flightData.rows()) {
+    String name = row.getString("MKT_CARRIER");
+
+    if (name != null && name.equals(airline)) {
+
+      int dist = row.getInt("DISTANCE");
+
+      int bucket = dist / 1000;
+      if (bucket >= buckets.length) bucket = buckets.length - 1;
+
+      buckets[bucket]++;
+    }
+  }
+
+  return buckets;
+}
+
+// =======  DRAWING PIE CHART DISTANCES   ====
+void drawPieChartDistances() {
+  if (counts == null) return;
+
+  float diameter = 400;
+  float lastAngle = 0;
+  int total = 0;
+
+  for (int c : counts) total += c;
+
+  color[] palette = {
+    color(227, 59, 84), 
+    color(235, 163, 63), 
+    color(138, 106, 217), 
+    color(103, 214, 183)
+  };
+
+  for (int i = 0; i < counts.length; i++) {
+    float angle = map(counts[i], 0, total, 0, TWO_PI);
+
+    fill(palette[i]);
+    arc(600, 350, diameter, diameter, lastAngle, lastAngle + angle);
+
+    lastAngle += angle;
+  }
+
+  // title
+  fill(255);
+  textAlign(CENTER);
+  text("Airline: " + selectedAirline, 600, 80);
+}
+
 
 // ================= WIDGET =================
 class Widget {
