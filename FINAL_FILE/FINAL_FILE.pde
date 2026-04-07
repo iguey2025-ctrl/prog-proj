@@ -1,5 +1,4 @@
-import controlP5.*;
-ControlP5 cp5;
+
 
 PFont stdFont;
 PFont startFont;
@@ -9,7 +8,7 @@ final int EVENT_BUTTON_QUERY=1;
 final int EVENT_BUTTON_DRAW=2;
 final int EVENT_BUTTON_START =5;
 final int EVENT_BUTTON_BACK =6;
-final int EVENT_BUTTON_EXIT =7;
+//final int EVENT_BUTTON_EXIT =7;
 
 final int EVENT_BAR = 10;
 final int EVENT_SCATTER = 11;
@@ -38,7 +37,7 @@ ArrayList<Screen> screenHistory = new ArrayList<Screen>();
 Widget widgetDrawGraph;
 Widget startButton;
 Widget introStartButton;
-Widget exitButton;
+//Widget exitButton;
 Widget backButton;
 Widget confirmAirlinesButton;
 Widget showDistancesButton;
@@ -65,27 +64,21 @@ int[] countsCancelled;
 Widget[] airlineButtonsDist;
 Widget[] airlineButtonsCancelled;
 
-PImage testDog;
+PImage planeImage, title, planeIcon;
 
 
 // ================= SETUP =================
 void setup(){
   size(1000,700);
   flightData = loadTable("flights2k.csv", "header");
-  testDog = loadImage("dogpng.png");
+  planeImage = loadImage("plane.png");
+  planeImage.resize(200,100);
   
+  planeIcon = loadImage("planeIcon.jpg");
+  planeIcon.resize(400,200);
+  title = loadImage("title.png");
   
-  cp5 = new ControlP5(this);
-  
-   DropdownList ddl = cp5.addDropdownList("sort by:")
-  .setPosition(100,600)
-  .setSize(100,1000)
-  .setBackgroundColor(color(100))
-  .setBarHeight(20);
-
-  ddl.addItem("airline", 1);
-  ddl.addItem("location", 2);
-  ddl.addItem("destination", 3);
+ 
 
   stdFont = createFont("Arial", 14);
   startFont = createFont("Arial", 40);
@@ -94,11 +87,12 @@ void setup(){
   backButton = new Widget(20,20,100,40,"Back",color(#FF6B6B),stdFont,EVENT_BUTTON_BACK);
 
   // ===== INTRO SCREEN =====
-  introScreen = new Screen(color(#A8D8FF));
-  introStartButton = new Widget(400,300,200,80,"START",color(#68D1EA),stdFont,EVENT_BUTTON_START);
-  exitButton = new Widget(400,420,200,80,"EXIT",color(#DE2D44),stdFont,EVENT_BUTTON_EXIT);
+  introScreen = new Screen(color(#FFFFFF));
+
+  introStartButton = new Widget(400,500,200,50,"START",color(#4D92F0),stdFont,EVENT_BUTTON_START);
+  //exitButton = new Widget(400,420,200,80,"EXIT",color(#DE2D44),stdFont,EVENT_BUTTON_EXIT);
   introScreen.add(introStartButton);
-  introScreen.add(exitButton);
+  //introScreen.add(exitButton);
 
   // ===== SELECTION SCREEN =====
   selectionScreen = new Screen(color(#CFF5E7));
@@ -197,7 +191,12 @@ void setup(){
 // ================= DRAW =================
 void draw(){
   currentScreen.draw();
-
+  fill(#C12323);
+  strokeWeight(2);
+  rect(0,0,width,8);
+  rect(width-8,0,8,height);
+  rect(0,height-8,width,8);
+  rect(0,0,8,height);
   if(currentScreen == airlineSelectScreen){
     for(int i=0;i<airlineCheckboxes.length;i++){
       Widget w = airlineCheckboxes[i];
@@ -234,9 +233,17 @@ void draw(){
   }
   
   if(currentScreen == selectionScreen){
-    image(testDog,300,300);
+    image(planeImage,100,300);
   }
+  if(currentScreen == introScreen){
+    title.resize(700,350);
+    image(title, 50,50);
+    image(planeIcon,550,50);
+  }
+  
+  
 }
+
 
 
 
@@ -327,10 +334,6 @@ void mousePressed(){
       if(screenHistory.size() > 0){
         currentScreen = screenHistory.remove(screenHistory.size()-1);
       }
-      break;
-
-    case EVENT_BUTTON_EXIT:
-      exit();
       break;
   }
 }
