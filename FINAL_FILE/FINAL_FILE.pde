@@ -4,10 +4,14 @@ PFont stdFont;
 PFont startFont;
 PFont smallFont;
 
+
+boolean continuePressed = false;
+
 final int EVENT_BUTTON_QUERY=1;
 final int EVENT_BUTTON_DRAW=2;
 final int EVENT_BUTTON_START =5;
 final int EVENT_BUTTON_BACK =6;
+final int EVENT_BUTTON_CONTINUE = 40;
 //final int EVENT_BUTTON_EXIT =7;
 
 final int EVENT_BAR = 10;
@@ -22,6 +26,10 @@ final int EVENT_SELECT_AIRLINE_SCREEN = 50;
 final int EVENT_CONFIRM_AIRLINES = 51;
 final int EVENT_SHOW_DISTANCES = 52;
 
+final int EVENT_MAP_BUTTON = 30;
+final int EVENT_DEP_TIME = 31;
+final int EVENT_ARR_TIME = 32;
+
 Table flightData;
 
 Screen introScreen;
@@ -30,6 +38,9 @@ Screen AirportScreen;
 Screen graphScreen;
 Screen selectionScreen;
 Screen airlineSelectScreen;
+Screen depScreen;
+Screen arrScreen;
+Screen mapScreen;
 
 Screen currentScreen;
 ArrayList<Screen> screenHistory = new ArrayList<Screen>();
@@ -39,8 +50,13 @@ Widget startButton;
 Widget introStartButton;
 //Widget exitButton;
 Widget backButton;
+Widget continueButton; // for map Screen
 Widget confirmAirlinesButton;
 Widget showDistancesButton;
+Widget mapButton;
+Widget depButton;
+Widget arrButton;
+
 
 Widget buttonBar;
 Widget buttonScatter;
@@ -65,6 +81,7 @@ Widget[] airlineButtonsDist;
 Widget[] airlineButtonsCancelled;
 
 PImage planeImage, title, planeIcon;
+PImage map;
 
 
 // ================= SETUP =================
@@ -77,7 +94,7 @@ void setup(){
   planeIcon = loadImage("planeIcon.jpg");
   planeIcon.resize(400,200);
   title = loadImage("title.png");
-  
+  map = loadImage("USMAP.png");
  
 
   stdFont = createFont("Arial", 14);
@@ -85,7 +102,7 @@ void setup(){
   textFont(stdFont);
 
   backButton = new Widget(20,20,100,40,"Back",color(#FF6B6B),stdFont,EVENT_BUTTON_BACK);
-
+  continueButton = new Widget(860,635,110,42,"Continue", color(#FF6B6B), stdFont, EVENT_BUTTON_CONTINUE);
   // ===== INTRO SCREEN =====
   introScreen = new Screen(color(#FFFFFF));
 
@@ -96,11 +113,17 @@ void setup(){
 
   // ===== SELECTION SCREEN =====
   selectionScreen = new Screen(color(#CFF5E7));
-  selectAirlineButton = new Widget(350,250,300,80,"Select Airline",color(#68D1EA),stdFont,20);
-  selectAirportButton = new Widget(350,370,300,80,"Select Airport",color(#68D1EA),stdFont,21);
+  selectAirlineButton = new Widget(350,200,250,50,"Airline",color(#68D1EA),stdFont,20);
+  selectAirportButton = new Widget(350,300,250,50,"Airport",color(#68D1EA),stdFont,21);
+  mapButton = new Widget(350,600,250,50,"View Map", color(#68D1EA), stdFont, EVENT_MAP_BUTTON);
+  depButton = new Widget(350,400,250,50,"Departure Time", color(#68D1EA), stdFont, EVENT_DEP_TIME);
+  arrButton = new Widget(350,500,250,50,"Arrival Time", color(#68D1EA), stdFont, EVENT_ARR_TIME);
   selectionScreen.add(selectAirlineButton);
   selectionScreen.add(selectAirportButton);
   selectionScreen.add(backButton);
+  selectionScreen.add(mapButton);
+  selectionScreen.add(depButton);
+  selectionScreen.add(arrButton);
 
   // AIRLINE SELECT SCREEN
   airlineSelectScreen = new Screen(color(255));
@@ -186,6 +209,18 @@ void setup(){
   AirportScreen.add(buttonPieCancelled);
   AirportScreen.add(buttonPieDist);
   AirportScreen.add(backButton);
+  
+  
+  
+  //==============DEP SCREEN
+  depScreen = new Screen(color(255));
+  //==============ARR SCREEN
+  arrScreen = new Screen(color(255));
+  //===============MAP SCREEN
+  mapScreen = new Screen(color(255));
+  mapScreen.add(backButton);
+  mapScreen.add(continueButton);
+  
 }
 
 // ================= DRAW =================
@@ -231,7 +266,7 @@ void draw(){
       drawAirlineButtonsDist();
     }
   }
-  
+//==============ADDING TO SCREENS
   if(currentScreen == selectionScreen){
     image(planeImage,100,300);
   }
@@ -239,6 +274,31 @@ void draw(){
     title.resize(700,350);
     image(title, 50,50);
     image(planeIcon,550,50);
+  }
+  fill(#000000);
+  if(currentScreen == selectionScreen){
+    textSize(30);
+    text("What category would you like to view the data by?",510,100);
+    textSize(20);
+  }
+  if(currentScreen == mapScreen){
+    map.resize(900,600);
+    image(map, 50,75);
+    mapScreen.add(backButton);
+    mapScreen.add(continueButton);
+    text("Please click on a departure state", 500,50);
+    text("You've selected:   ",500,85);
+    if(continuePressed ==true){
+      fill(255);
+      noStroke();
+      rect(350,15,300,90);
+      stroke(3);
+      fill(#000000);
+      text("Please click on an arrival state", 500,50);
+      text("You've selected:   ", 500,85);
+    }
+
+    
   }
   
   
@@ -331,9 +391,22 @@ void mousePressed(){
       break;
 
     case EVENT_BUTTON_BACK:
+      continuePressed = false;
       if(screenHistory.size() > 0){
         currentScreen = screenHistory.remove(screenHistory.size()-1);
       }
+      break;
+    case EVENT_DEP_TIME:
+      switchScreen(depScreen);
+      break;
+    case EVENT_ARR_TIME:
+      switchScreen(arrScreen);
+      break;
+    case EVENT_MAP_BUTTON:
+      switchScreen(mapScreen);
+      break;
+    case EVENT_BUTTON_CONTINUE:
+      continuePressed = true;;
       break;
   }
 }
@@ -612,7 +685,7 @@ class Widget {
   }
 }
 
-// ================= SCREEN =================
+// ================= SCREEN ================= 
 class Screen {
   ArrayList screenWidgets;
   color screenColor;
