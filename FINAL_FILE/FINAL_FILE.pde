@@ -4,8 +4,10 @@ PFont stdFont;
 PFont startFont;
 PFont smallFont;
 
-
+//===========for map
 boolean continuePressed = false;
+String selectedArrState = "";
+String selectedDepState = "";
 
 final int EVENT_BUTTON_QUERY=1;
 final int EVENT_BUTTON_DRAW=2;
@@ -29,6 +31,24 @@ final int EVENT_SHOW_DISTANCES = 52;
 final int EVENT_MAP_BUTTON = 30;
 final int EVENT_DEP_TIME = 31;
 final int EVENT_ARR_TIME = 32;
+
+//============MANUALLY DOING EVERY STATE + BUTTONS
+final int WA_BUTTON = 100;
+final int OR_BUTTON = 101;
+final int CA_BUTTON = 102;
+final int AK_BUTTON = 103;
+final int ID_BUTTON = 104;
+final int NV_BUTTON = 105;
+
+Widget WA;
+Widget OR;
+Widget CA;
+Widget AK;
+Widget ID;
+Widget NV;
+
+
+
 
 Table flightData;
 
@@ -105,19 +125,24 @@ void setup(){
   continueButton = new Widget(860,635,110,42,"Continue", color(#FF6B6B), stdFont, EVENT_BUTTON_CONTINUE);
   // ===== INTRO SCREEN =====
   introScreen = new Screen(color(#FFFFFF));
-
+  
+  
   introStartButton = new Widget(400,500,200,50,"START",color(#4D92F0),stdFont,EVENT_BUTTON_START);
+  introStartButton.changeTextSize(30);
   //exitButton = new Widget(400,420,200,80,"EXIT",color(#DE2D44),stdFont,EVENT_BUTTON_EXIT);
   introScreen.add(introStartButton);
   //introScreen.add(exitButton);
 
   // ===== SELECTION SCREEN =====
   selectionScreen = new Screen(color(#CFF5E7));
-  selectAirlineButton = new Widget(350,200,250,50,"Airline",color(#68D1EA),stdFont,20);
-  selectAirportButton = new Widget(350,300,250,50,"Airport",color(#68D1EA),stdFont,21);
-  mapButton = new Widget(350,600,250,50,"View Map", color(#68D1EA), stdFont, EVENT_MAP_BUTTON);
-  depButton = new Widget(350,400,250,50,"Departure Time", color(#68D1EA), stdFont, EVENT_DEP_TIME);
-  arrButton = new Widget(350,500,250,50,"Arrival Time", color(#68D1EA), stdFont, EVENT_ARR_TIME);
+  selectAirlineButton = new Widget(350,250,250,50,"Airline",color(#68D1EA),stdFont,20);
+  selectAirportButton = new Widget(350,320,250,50,"Airport",color(#68D1EA),stdFont,21);
+  mapButton = new Widget(350,530,250,50,"View Map", color(#68D1EA), stdFont, EVENT_MAP_BUTTON);
+  depButton = new Widget(350,390,250,50,"Departure Time", color(#68D1EA), stdFont, EVENT_DEP_TIME);
+  arrButton = new Widget(350,460,250,50,"Arrival Time", color(#68D1EA), stdFont, EVENT_ARR_TIME);
+  showDistancesButton = new Widget(350,600,250,50,"Distance",color(#68D1EA),stdFont,EVENT_SHOW_DISTANCES);
+
+  selectionScreen.add(showDistancesButton);
   selectionScreen.add(selectAirlineButton);
   selectionScreen.add(selectAirportButton);
   selectionScreen.add(backButton);
@@ -183,14 +208,12 @@ void setup(){
   // CHECKBOXES
   airlineCheckboxes = new Widget[airlines.size()];
   for (int i = 0; i < airlines.size(); i++) {
-    airlineCheckboxes[i] = new Widget(60, 80 + i * 35, 20, 20, airlines.get(i), color(200), stdFont, 1000+i);
+    airlineCheckboxes[i] = new Widget(80, 160 + i * 35, 20, 20, airlines.get(i), color(200), stdFont, 1000+i);
   }
 
   confirmAirlinesButton = new Widget(300,600,200,60,"Show Flights",color(#68D1EA),stdFont,EVENT_CONFIRM_AIRLINES);
-  showDistancesButton = new Widget(550,600,200,60,"Show Distances",color(#68D1EA),stdFont,EVENT_SHOW_DISTANCES);
 
   airlineSelectScreen.add(confirmAirlinesButton);
-  airlineSelectScreen.add(showDistancesButton);
   airlineSelectScreen.add(backButton);
 
   // ===== AIRPORT SCREEN =====
@@ -288,6 +311,8 @@ void draw(){
     mapScreen.add(continueButton);
     text("Please click on a departure state", 500,50);
     text("You've selected:   ",500,85);
+    fill(#F20515);
+    text(selectedDepState, 600,85);
     if(continuePressed ==true){
       fill(255);
       noStroke();
@@ -295,7 +320,9 @@ void draw(){
       stroke(3);
       fill(#000000);
       text("Please click on an arrival state", 500,50);
-      text("You've selected:   ", 500,85);
+      text("You've selected: ", 500,85);
+      fill(#F20515);
+      text(selectedArrState, 600, 85);
     }
 
     
@@ -677,6 +704,9 @@ class Widget {
     text(label, x+width/2, y+height/2);
   }
 
+  void changeTextSize(int s){
+    textSize(s);
+  }
   int getEvent(int mX, int mY) {
     if (mX>x && mX < x+width && mY >y && mY <y+height) {
       return event;
