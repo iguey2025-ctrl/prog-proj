@@ -18,6 +18,11 @@ final int EVENT_PIE_DISTANCE = 13;
 final int EVENT_NULL=0;
 final int EVENT_PIE_CITY_DIST = 21;
 
+// NEW EVENTS
+final int EVENT_SELECT_AIRLINE_SCREEN = 50;
+final int EVENT_CONFIRM_AIRLINES = 51;
+final int EVENT_SHOW_DISTANCES = 52;
+
 Table flightData;
 
 Screen introScreen;
@@ -25,17 +30,18 @@ Screen AirlineScreen;
 Screen AirportScreen;
 Screen graphScreen;
 Screen selectionScreen;
+Screen airlineSelectScreen;
 
 Screen currentScreen;
-//Screen previousScreen;
 ArrayList<Screen> screenHistory = new ArrayList<Screen>();
 
-TextWidget widgetEntryText;
 Widget widgetDrawGraph;
 Widget startButton;
 Widget introStartButton;
 Widget exitButton;
 Widget backButton;
+Widget confirmAirlinesButton;
+Widget showDistancesButton;
 
 Widget buttonBar;
 Widget buttonScatter;
@@ -43,8 +49,9 @@ Widget buttonPieCancelled;
 Widget buttonPieDist;
 Widget selectAirlineButton;
 Widget selectAirportButton;
-Widget buttonPieCityDist;
-TextWidget activeTextWidget = null;
+
+Widget[] airlineCheckboxes;
+ArrayList<String> selectedAirlines = new ArrayList<String>();
 
 int topN = 20;
 String selectedColumn = "";
@@ -58,13 +65,14 @@ int[] countsCancelled;
 Widget[] airlineButtonsDist;
 Widget[] airlineButtonsCancelled;
 
+// ================= SETUP =================
 void setup(){
   size(1000,700);
   flightData = loadTable("flights2k.csv", "header");
 
   cp5 = new ControlP5(this);
-
-  DropdownList ddl = cp5.addDropdownList("sort by:")
+  
+   DropdownList ddl = cp5.addDropdownList("sort by:")
   .setPosition(100,600)
   .setSize(100,1000)
   .setBackgroundColor(color(100))
@@ -76,80 +84,47 @@ void setup(){
 
   stdFont = createFont("Arial", 14);
   startFont = createFont("Arial", 40);
-  //smallFont = loadFont("AppleSDGothicNeo-Light-20.vlw");
   textFont(stdFont);
+
   backButton = new Widget(20,20,100,40,"Back",color(#FF6B6B),stdFont,EVENT_BUTTON_BACK);
 
-// ===== INTRO SCREEN =====
+  // ===== INTRO SCREEN =====
   introScreen = new Screen(color(#A8D8FF));
-
   introStartButton = new Widget(400,300,200,80,"START",color(#68D1EA),stdFont,EVENT_BUTTON_START);
   exitButton = new Widget(400,420,200,80,"EXIT",color(#DE2D44),stdFont,EVENT_BUTTON_EXIT);
-
   introScreen.add(introStartButton);
   introScreen.add(exitButton);
 
-  
-// ===== SELECTION SCREEN =====
-selectionScreen = new Screen(color(#CFF5E7));
+  // ===== SELECTION SCREEN =====
+  selectionScreen = new Screen(color(#CFF5E7));
+  selectAirlineButton = new Widget(350,250,300,80,"Select Airline",color(#68D1EA),stdFont,20);
+  selectAirportButton = new Widget(350,370,300,80,"Select Airport",color(#68D1EA),stdFont,21);
+  selectionScreen.add(selectAirlineButton);
+  selectionScreen.add(selectAirportButton);
+  selectionScreen.add(backButton);
 
-selectAirlineButton = new Widget(350,250,300,80,"Select Airline",color(#68D1EA),stdFont,20);
-selectAirportButton = new Widget(350,370,300,80,"Select Airport",color(#68D1EA),stdFont,21);
+  // AIRLINE SELECT SCREEN
+  airlineSelectScreen = new Screen(color(255));
 
-// reuse existing back button
-selectionScreen.add(selectAirlineButton);
-selectionScreen.add(selectAirportButton);
-selectionScreen.add(backButton);
-
-// ===== AIRLINE SCREEN =====
-  AirlineScreen = new Screen(color(255));
-
-  widgetEntryText = new TextWidget(350,200,300,50,"",color(#68D1EA),stdFont,EVENT_BUTTON_QUERY,20);
-  widgetDrawGraph = new Widget(400,300,200,60,"Draw Graph",color(#68D1EA),stdFont,EVENT_BUTTON_DRAW);
-
-  buttonBar = new Widget(40,120,180,50,"Bar Chart",color(120),stdFont,EVENT_BAR);
-  buttonScatter = new Widget(40,190,180,50,"Scatter",color(140),stdFont,EVENT_SCATTER);
-  buttonPieCancelled = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE_CANCELLED);
-  buttonPieDist = new Widget(40,330,180,50,"Pie Chart Dist",color(160),stdFont,EVENT_PIE_DISTANCE);
-
-
-  AirlineScreen.add(widgetEntryText);
-  AirlineScreen.add(widgetDrawGraph);
-  AirlineScreen.add(buttonBar);
-  AirlineScreen.add(buttonScatter);
-  AirlineScreen.add(buttonPieCancelled);
-  AirlineScreen.add(buttonPieDist);
-  AirlineScreen.add(backButton);
-
-// ===== AIRPORT SCREEN =====
-  AirportScreen = new Screen(color(255));
-
-  buttonPieCityDist = new Widget(40,120,180,50,"Dist from airport city",color(120),stdFont,EVENT_PIE_CITY_DIST);
-
-  AirportScreen.add(buttonPieCityDist);
-  AirportScreen.add(backButton);
-
-
-// ===== GRAPH SCREEN =====
+  // GRAPH SCREEN
   graphScreen = new Screen(color(255));
   graphScreen.add(backButton);
 
   currentScreen = introScreen;
 
-
-  // === GET AIRLINES ===
+  // LOAD AIRLINES
   for (TableRow row : flightData.rows()) {
     String name = row.getString("MKT_CARRIER");
-    if (name != null && !name.equals("") && !airlines.contains(name)) {
+    if (name != null && !airlines.contains(name)) {
       airlines.add(name);
     }
   }
-  
+
   selectedAirlineDist = airlines.get(0);
   selectedAirlineCancelled = airlines.get(0);
   countsDist = queryAirlineDistances(selectedAirlineDist);
   countsCancelled = queryCancelledByAirport(selectedAirlineCancelled);
-  
+
     // === CREATE BUTTONS AIRLINES DISTANCES ===
   int n = min(10, airlines.size());
   airlineButtonsDist = new Widget[n];
@@ -167,8 +142,6 @@ selectionScreen.add(backButton);
     );
   }
   
-  
-  
     // === CREATE BUTTONS AIRLINES CANCELLED ===
   airlineButtonsCancelled = new Widget[n];
   
@@ -184,24 +157,70 @@ selectionScreen.add(backButton);
       100 + i
     );
   }
- 
+
+  // CHECKBOXES
+  airlineCheckboxes = new Widget[airlines.size()];
+  for (int i = 0; i < airlines.size(); i++) {
+    airlineCheckboxes[i] = new Widget(60, 80 + i * 35, 20, 20, airlines.get(i), color(200), stdFont, 1000+i);
+  }
+
+  confirmAirlinesButton = new Widget(300,600,200,60,"Show Flights",color(#68D1EA),stdFont,EVENT_CONFIRM_AIRLINES);
+  showDistancesButton = new Widget(550,600,200,60,"Show Distances",color(#68D1EA),stdFont,EVENT_SHOW_DISTANCES);
+
+  airlineSelectScreen.add(confirmAirlinesButton);
+  airlineSelectScreen.add(showDistancesButton);
+  airlineSelectScreen.add(backButton);
+
+  // ===== AIRPORT SCREEN =====
+  AirportScreen = new Screen(color(255));
+
+  widgetDrawGraph = new Widget(400,300,200,60,"Draw Graph",color(#68D1EA),stdFont,EVENT_BUTTON_DRAW);
+
+  buttonBar = new Widget(40,120,180,50,"Bar Chart",color(120),stdFont,EVENT_BAR);
+  buttonScatter = new Widget(40,190,180,50,"Scatter",color(140),stdFont,EVENT_SCATTER);
+  buttonPieCancelled = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE_CANCELLED);
+  buttonPieDist = new Widget(40,330,180,50,"Pie Chart Dist",color(160),stdFont,EVENT_PIE_DISTANCE);
+
+  AirportScreen.add(widgetDrawGraph);
+  AirportScreen.add(buttonBar);
+  AirportScreen.add(buttonScatter);
+  AirportScreen.add(buttonPieCancelled);
+  AirportScreen.add(buttonPieDist);
+  AirportScreen.add(backButton);
 }
 
+// ================= DRAW =================
 void draw(){
   currentScreen.draw();
 
-  if(currentScreen == graphScreen){
-    if(graphType == EVENT_BAR && selectedColumn != ""){
-      drawBarGraph(selectedColumn);
+  if(currentScreen == airlineSelectScreen){
+    for(int i=0;i<airlineCheckboxes.length;i++){
+      Widget w = airlineCheckboxes[i];
+
+      fill(255);
+      stroke(0);
+      rect(w.x, w.y, 20, 20);
+
+      if(selectedAirlines.contains(airlines.get(i))){
+        line(w.x, w.y, w.x+20, w.y+20);
+        line(w.x+20, w.y, w.x, w.y+20);
+      }
+
+      fill(0);
+      textAlign(LEFT, CENTER);
+      text(airlines.get(i), w.x+30, w.y+10);
     }
-    //else if(graphType == EVENT_SCATTER){
-    //  drawScatterPlot(activeTextWidget.getLabel());
+  }
+
+  if(currentScreen == graphScreen){
+    if(graphType == EVENT_BAR){
+      drawBarGraph("MKT_CARRIER");
+    }
     else if(graphType == EVENT_SCATTER){
       drawScatterPlot(selectedColumn);
     }
     else if(graphType == EVENT_PIE_CANCELLED){
       drawPieChartCancelled();
-      drawAirlineButtonsCancelled();
     }
     else if(graphType == EVENT_PIE_DISTANCE){
       drawPieChartDistances();
@@ -210,31 +229,25 @@ void draw(){
   }
 }
 
-//screen switching
-void switchScreen(Screen newScreen){
-  if(currentScreen != null){
-    screenHistory.add(currentScreen); // додаємо в історію
-  }
-  currentScreen = newScreen;
-}
-
+// ================= MOUSE =================
 void mousePressed(){
 
-  activeTextWidget = null;
-
-////check if text box was clicked
-  for (Object w : currentScreen.getWidgets()) {
-    if (w instanceof TextWidget) {
-      TextWidget tw = (TextWidget) w;
-      if (tw.getEvent(mouseX, mouseY) != EVENT_NULL) {
-        activeTextWidget = tw;
+  if(currentScreen == airlineSelectScreen){
+    for (int i = 0; i < airlineCheckboxes.length; i++) {
+      Widget w = airlineCheckboxes[i];
+      if(mouseX>w.x && mouseX<w.x+20 && mouseY>w.y && mouseY<w.y+20){
+        String airline = airlines.get(i);
+        if(selectedAirlines.contains(airline)){
+          selectedAirlines.remove(airline);
+        } else {
+          selectedAirlines.add(airline);
+        }
       }
     }
   }
 
   int theEvent = currentScreen.getEvent();
-  
-  
+
   // ===== AIRLINE DISTANCE BUTTON CLICK =====
   if(graphType == EVENT_PIE_DISTANCE && airlineButtonsDist != null){
     for (int i = 0; i < airlineButtonsDist.length; i++) {
@@ -257,46 +270,28 @@ void mousePressed(){
 
   switch(theEvent){
 
-case EVENT_BUTTON_START:
-  if(currentScreen == introScreen){
-    switchScreen(selectionScreen);
-  } 
-  else if(currentScreen == selectionScreen){
-    switchScreen(AirlineScreen);
-  }
-  break;
-
-case 20: // Select Airline
-  selectedColumn = "AIRLINE";  
-  switchScreen(AirlineScreen);
-  break;
-
-case 21: // Select Airport
-  selectedColumn = "ORIGIN";   
-  switchScreen(AirportScreen);
-  break;
-
-//draw graph button
-    case EVENT_BUTTON_DRAW:
-      if(widgetEntryText.label.length() > 0){
-        selectedColumn = widgetEntryText.label;
-        switchScreen(graphScreen);
-      }
+    case EVENT_BUTTON_START:
+      switchScreen(selectionScreen);
       break;
 
-//back button
-    case EVENT_BUTTON_BACK:
-      if(screenHistory.size() > 0){
-        currentScreen = screenHistory.get(screenHistory.size() - 1);
-        screenHistory.remove(screenHistory.size() - 1);
-      }
+    case 20:
+      switchScreen(airlineSelectScreen);
       break;
 
-    case EVENT_BUTTON_EXIT:
-      exit();
+    case 21:
+      switchScreen(AirportScreen);
       break;
 
-//choose graph type 
+    case EVENT_CONFIRM_AIRLINES:
+      graphType = EVENT_BAR;
+      switchScreen(graphScreen);
+      break;
+
+    case EVENT_SHOW_DISTANCES:
+      graphType = EVENT_PIE_DISTANCE;
+      switchScreen(graphScreen);
+      break;
+
     case EVENT_BAR:
       graphType = EVENT_BAR;
       break;
@@ -310,29 +305,36 @@ case 21: // Select Airport
       graphType = EVENT_PIE_CANCELLED;
       switchScreen(graphScreen);
       break;
-      
+
     case EVENT_PIE_DISTANCE:
       graphType = EVENT_PIE_DISTANCE;
       switchScreen(graphScreen);
       break;
+
+    case EVENT_BUTTON_BACK:
+      if(screenHistory.size() > 0){
+        currentScreen = screenHistory.remove(screenHistory.size()-1);
+      }
+      break;
+
+    case EVENT_BUTTON_EXIT:
+      exit();
+      break;
   }
 }
 
-//===================KEYBOARD INPUT======================
-//type into text box 
-void keyPressed(){
-  if (activeTextWidget != null){
-    activeTextWidget.append(key);
-  }
-}
-
-//===================DRAWBARGRAPH FUNCTOIN======================
+// BAR GRAPH + filtering added
 void drawBarGraph(String columnName) {
   // --- Count frequencies ---
   HashMap<String, Integer> counts = new HashMap<String, Integer>();
-  for (TableRow row : flightData.rows()) {
-    String val = row.getString(columnName);
-    counts.put(val, counts.getOrDefault(val, 0) + 1);
+    for (TableRow row : flightData.rows()) {
+    String airline = row.getString("MKT_CARRIER");
+
+    //filter by selected airlines
+    if(selectedAirlines.size()==0 || selectedAirlines.contains(airline)){
+      String val = row.getString(columnName);
+      counts.put(val, counts.getOrDefault(val, 0) + 1);
+    }
   }
 
   // --- Sort by frequency descending, take top N ---
@@ -401,6 +403,15 @@ void drawBarGraph(String columnName) {
   textAlign(CENTER);
   text("Carrier Frequency", marginL + chartW/2, 30);
 }
+// ================= NAV =================
+void switchScreen(Screen newScreen){
+  if(currentScreen != null){
+    screenHistory.add(currentScreen);
+  }
+  currentScreen = newScreen;
+}
+
+
 
 // ======= QUERY CANCELLED FLIGHTS ===========
 int[] queryCancelledByAirport(String airport) {
@@ -453,16 +464,13 @@ void drawPieChartCancelled() {
   text("Not Cancelled: " + notCancelled, cx + 120, cy + r + 40);
 }
 
-//=================== SCATTER PLOT ======================
+// ================= SCATTER =================
 void drawScatterPlot(String input) {
-
   int marginL = 260, marginT = 60;
 
-  //draw axes
   line(marginL, height-100, width-50, height-100);
   line(marginL, marginT, marginL, height-100);
 
-  //plot points
   for (TableRow row : flightData.rows()) {
     float xVal = row.getFloat("DISTANCE");
     float yVal = row.getFloat(input);
@@ -470,27 +478,9 @@ void drawScatterPlot(String input) {
     float x = map(xVal, 0, 3000, marginL, width-50);
     float y = map(yVal, 0, 2400, height-100, marginT);
 
-    //hover
-    boolean hover = dist(mouseX, mouseY, x, y) < 5;
-
-    fill(hover ? color(70, 130, 200) : color(100, 160, 220));
-    ellipse(x, y, hover ? 8 : 5, hover ? 8 : 5);
+    ellipse(x, y, 5, 5);
   }
-
-  //labels
-  fill(0);
-  textAlign(CENTER);
-  text(input, marginL + 300, 30);
-
-  text("Distance", marginL + 350, height - 80);
-
-  pushMatrix();
-  translate(30, height/2);
-  rotate(-HALF_PI);
-  text(input, 10, 220);
-  popMatrix();
 }
-
 
 // ======== QUERY AIRLENE DISTANCES PIE CHART ==========
 int[] queryAirlineDistances(String airline) {
@@ -580,7 +570,6 @@ class Widget {
 
   Widget (int x, int y, int width, int height, String label,
     color widgetColor, PFont widgetFont, int event) {
-
     this.x = x;
     this.y = y;
     this.width = width;
@@ -595,7 +584,6 @@ class Widget {
     boolean hover = mouseX>x && mouseX<x+width && mouseY>y && mouseY<y+height;
     fill(hover ? color(70, 130, 200) : widgetColor);
     rect(x, y, width, height, 8);
-
     fill(0);
     textAlign(CENTER, CENTER);
     text(label, x+width/2, y+height/2);
@@ -606,42 +594,6 @@ class Widget {
       return event;
     }
     return EVENT_NULL;
-  }
-}
-
-// ================= TEXT WIDGET =================
-class TextWidget extends Widget {
-
-  int maxlen;
-
-  TextWidget (int x, int y, int width, int height, String label,
-    color widgetColor, PFont font, int event, int maxlen) {
-
-    super (x, y, width, height, label, widgetColor, font, event);
-    this.maxlen = maxlen;
-  }
-  
-  String getLabel(){
-    return label;
-  }
-
-  void draw() {
-    fill(widgetColor);
-    rect(x, y, width, height);
-
-    fill(0);
-    textAlign(LEFT, CENTER);
-    text(label, x + 5, y + height/2);
-  }
-
-  void append(char s) {
-    if (s == BACKSPACE) {
-      if (label.length() > 0) {
-        label = label.substring(0, label.length()-1);
-      }
-    } else if (s != ENTER && s != RETURN && label.length() < maxlen) {
-      label += s;
-    }
   }
 }
 
@@ -677,8 +629,7 @@ class Screen {
     }
     return EVENT_NULL;
   }
-
-  ArrayList getWidgets() {
+   ArrayList getWidgets() {
     return screenWidgets;
   }
 }
