@@ -65,11 +65,16 @@ int[] countsCancelled;
 Widget[] airlineButtonsDist;
 Widget[] airlineButtonsCancelled;
 
+PImage testDog;
+
+
 // ================= SETUP =================
 void setup(){
   size(1000,700);
   flightData = loadTable("flights2k.csv", "header");
-
+  testDog = loadImage("dogpng.png");
+  
+  
   cp5 = new ControlP5(this);
   
    DropdownList ddl = cp5.addDropdownList("sort by:")
@@ -227,7 +232,13 @@ void draw(){
       drawAirlineButtonsDist();
     }
   }
+  
+  if(currentScreen == selectionScreen){
+    image(testDog,300,300);
+  }
 }
+
+
 
 // ================= MOUSE =================
 void mousePressed(){
@@ -272,6 +283,7 @@ void mousePressed(){
 
     case EVENT_BUTTON_START:
       switchScreen(selectionScreen);
+       
       break;
 
     case 20:
@@ -610,7 +622,10 @@ class Screen {
   void add(Widget w) {
     screenWidgets.add(w);
   }
-
+  
+  void addImage(PImage i, int x, int y){
+    image(i, x, y);
+  }
   void draw() {
     background(screenColor);
     for (int i = 0; i<screenWidgets.size(); i++) {
