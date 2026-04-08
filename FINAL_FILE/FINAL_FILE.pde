@@ -209,8 +209,8 @@ void setup(){
   
 //====================IMAGES==================
   flightData = loadTable("flights2k.csv", "header");
-  planeImage = loadImage("plane.png");
-  planeImage.resize(200,100);
+  planeImage = loadImage("planeIcon.png");
+  planeImage.resize(150,100);
   
   clouds = loadImage("clouds.png");
   planeIcon = loadImage("plane.png");
@@ -489,7 +489,7 @@ popStyle();
   }
 //==============ADDING TO SCREENS
   if(currentScreen == selectionScreen){
-    image(planeImage,100,300);
+    
     noStroke();
     fill(#FFFFFF);
     rect(90,114,830,70, 15);
@@ -926,9 +926,19 @@ class Widget {
     boolean hover = mouseX>x && mouseX<x+width && mouseY>y && mouseY<y+height;
     if(hover){
       fill(color(70,130,200));
-      if(currentScreen == introScreen){
-        textSize(28);
-      }else{textSize(17.5);}
+      if(label.equals("Back") == false && label.equals("Continue")==false){
+        if(currentScreen == introScreen){
+           textSize(28);
+         }else{
+           textSize(17.5);
+           if(currentScreen==selectionScreen){
+             image(planeImage,x-155,y-28);
+              
+             image(planeImage,x+252,y-28);
+           }
+       }
+      }
+      
     }else{
       fill(widgetColor);
       if(currentScreen==introScreen){
