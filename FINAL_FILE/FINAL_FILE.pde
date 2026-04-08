@@ -1,5 +1,3 @@
-
-
 PFont stdFont;
 PFont startFont;
 PFont smallFont;
@@ -8,6 +6,8 @@ PFont smallFont;
 boolean continuePressed = false;
 String selectedArrState = "";
 String selectedDepState = "";
+
+boolean selectAllChecked = false;
 
 final int EVENT_BUTTON_QUERY=1;
 final int EVENT_BUTTON_DRAW=2;
@@ -46,9 +46,6 @@ Widget CA;
 Widget AK;
 Widget ID;
 Widget NV;
-
-
-
 
 Table flightData;
 
@@ -213,7 +210,7 @@ void setup(){
 
   confirmAirlinesButton = new Widget(300,600,200,60,"Show Flights",color(#68D1EA),stdFont,EVENT_CONFIRM_AIRLINES);
 
-  airlineSelectScreen.add(confirmAirlinesButton);
+  //airlineSelectScreen.add(confirmAirlinesButton);
   airlineSelectScreen.add(backButton);
 
   // ===== AIRPORT SCREEN =====
@@ -256,23 +253,92 @@ void draw(){
   rect(0,height-8,width,8);
   rect(0,0,8,height);
   if(currentScreen == airlineSelectScreen){
-    for(int i=0;i<airlineCheckboxes.length;i++){
-      Widget w = airlineCheckboxes[i];
+   pushStyle();
 
-      fill(255);
-      stroke(0);
-      rect(w.x, w.y, 20, 20);
+textSize(24);
+fill(0);
+text("Select Airlines:", 125, 110);
 
-      if(selectedAirlines.contains(airlines.get(i))){
-        line(w.x, w.y, w.x+20, w.y+20);
-        line(w.x+20, w.y, w.x, w.y+20);
-      }
+// ===== SELECT ALL CHECKBOX =====
+boolean hoverAll = mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177;
 
-      fill(0);
-      textAlign(LEFT, CENTER);
-      text(airlines.get(i), w.x+30, w.y+10);
+// auto-sync state
+selectAllChecked = (selectedAirlines.size() == airlines.size());
+
+if(selectAllChecked){
+  fill(70,130,200);
+} else if(hoverAll){
+  fill(220);
+} else {
+  fill(245);
+}
+
+stroke(selectAllChecked ? color(70,130,200) : color(180));
+strokeWeight(2);
+rect(80, 155, 22, 22, 6);
+
+// checkmark
+if(selectAllChecked){
+  stroke(255);
+  strokeWeight(3);
+line(85, 167, 90, 172);
+line(90, 172, 97, 161);
+}
+
+fill(30);
+textAlign(LEFT, CENTER);
+textSize(16);
+text("Select All", 115, 165);
+
+
+// ===== NORMAL CHECKBOXES =====
+for(int i=0;i<airlineCheckboxes.length;i++){
+  Widget w = airlineCheckboxes[i];
+
+  // shift down so it doesn’t overlap
+  int yOffset = 30;
+  float y = w.y + yOffset;
+
+  boolean hover = mouseX>w.x && mouseX<w.x+22 && mouseY>y && mouseY<y+22;
+  boolean selected = selectedAirlines.contains(airlines.get(i));
+
+  if(selected){
+    fill(70, 130, 200);
+  } else if(hover){
+    fill(220);
+  } else {
+    fill(245);
+  }
+
+  stroke(selected ? color(70,130,200) : color(180));
+  strokeWeight(2);
+  rect(w.x, y, 22, 22, 6);
+
+  if(selected){
+    stroke(255);
+    strokeWeight(3);
+    line(w.x+5, y+12, w.x+10, y+17);
+    line(w.x+10, y+17, w.x+17, y+6);
+  }
+
+  fill(30);
+  textAlign(LEFT, CENTER);
+  textSize(14);
+  text(airlines.get(i), w.x+35, y+11);
+}
+
+popStyle();
+
+    // IF NONE SELECTED
+    if(selectedAirlines.size() == 0){
+      fill(200,0,0);
+      textSize(20);
+      text("Please select an airline!", 500, 350);
+    } else {
+      drawBarGraph("MKT_CARRIER");
     }
   }
+
 
   if(currentScreen == graphScreen){
     if(graphType == EVENT_BAR){
@@ -324,16 +390,9 @@ void draw(){
       text("You've selected: ", 500,85);
       fill(#F20515);
       text(selectedArrState, 600, 85);
-    }
-
-    
+    }  
   }
-  
-  
 }
-
-
-
 
 // ================= MOUSE =================
 void mousePressed(){
@@ -341,7 +400,8 @@ void mousePressed(){
   if(currentScreen == airlineSelectScreen){
     for (int i = 0; i < airlineCheckboxes.length; i++) {
       Widget w = airlineCheckboxes[i];
-      if(mouseX>w.x && mouseX<w.x+20 && mouseY>w.y && mouseY<w.y+20){
+      float y = w.y + 30;
+      if(mouseX>w.x && mouseX<w.x+22 && mouseY>y && mouseY<y+22){
         String airline = airlines.get(i);
         if(selectedAirlines.contains(airline)){
           selectedAirlines.remove(airline);
@@ -350,6 +410,17 @@ void mousePressed(){
         }
       }
     }
+    
+    // ===== SELECT ALL CLICK =====
+if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
+  if(selectedAirlines.size() == airlines.size()){
+    selectedAirlines.clear(); // deselect all
+  } else {
+    selectedAirlines.clear();
+    selectedAirlines.addAll(airlines); // select all
+  }
+  return; //prevent double triggering
+}
   }
 
   int theEvent = currentScreen.getEvent();
@@ -390,9 +461,9 @@ void mousePressed(){
       break;
 
     case EVENT_CONFIRM_AIRLINES:
-      graphType = EVENT_BAR;
-      switchScreen(graphScreen);
-      break;
+    graphType = EVENT_BAR;
+    switchScreen(graphScreen);
+    break;
 
     case EVENT_SHOW_DISTANCES:
       graphType = EVENT_PIE_DISTANCE;
