@@ -17,7 +17,7 @@ final int EVENT_BUTTON_CONTINUE = 40;
 //final int EVENT_BUTTON_EXIT =7;
 
 final int EVENT_BAR = 10;
-//final int EVENT_SCATTER = 11;
+final int EVENT_SCATTER = 11;
 final int EVENT_PIE_CANCELLED = 12;
 final int EVENT_PIE_DISTANCE = 13;
 final int EVENT_NULL=0;
@@ -54,7 +54,7 @@ Table flightData;
 
 Screen introScreen;
 Screen AirlineScreen;
-Screen AirportScreen;
+Screen selectSuccessfulFlightsButton;
 Screen graphScreen;
 Screen selectionScreen;
 Screen airlineSelectScreen;
@@ -136,7 +136,7 @@ void setup(){
   // ===== SELECTION SCREEN =====
   selectionScreen = new Screen(color(#CFF5E7));
   selectAirlineButton = new Widget(350,250,250,50,"Airline",color(#68D1EA),stdFont,20);
-  selectAirportButton = new Widget(350,320,250,50,"Successful Flights",color(#68D1EA),stdFont,EVENT_PIE_CANCELLED);
+  selectSuccessfulFlightsButton = new Widget(350,320,250,50,"Successful flights",color(#68D1EA),stdFont,21);
   mapButton = new Widget(350,530,250,50,"View Map", color(#68D1EA), stdFont, EVENT_MAP_BUTTON);
   depButton = new Widget(350,390,250,50,"Departure Time", color(#68D1EA), stdFont, EVENT_DEP_TIME);
   arrButton = new Widget(350,460,250,50,"Arrival Time", color(#68D1EA), stdFont, EVENT_ARR_TIME);
@@ -144,7 +144,7 @@ void setup(){
 
   selectionScreen.add(showDistancesButton);
   selectionScreen.add(selectAirlineButton);
-  selectionScreen.add(selectAirportButton);
+  selectionScreen.add(selectSuccessfulFlightsButton);
   selectionScreen.add(backButton);
   selectionScreen.add(mapButton);
   selectionScreen.add(depButton);
@@ -219,18 +219,18 @@ void setup(){
   // ===== AIRPORT SCREEN =====
   AirportScreen = new Screen(color(255));
 
-  //widgetDrawGraph = new Widget(400,300,200,60,"Draw Graph",color(#68D1EA),stdFont,EVENT_BUTTON_DRAW);
+  widgetDrawGraph = new Widget(400,300,200,60,"Draw Graph",color(#68D1EA),stdFont,EVENT_BUTTON_DRAW);
 
-  //buttonBar = new Widget(40,120,180,50,"Bar Chart",color(120),stdFont,EVENT_BAR);
-  //buttonScatter = new Widget(40,190,180,50,"Scatter",color(140),stdFont,EVENT_SCATTER);
-  //buttonPieCancelled = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE_CANCELLED);
-  //buttonPieDist = new Widget(40,330,180,50,"Pie Chart Dist",color(160),stdFont,EVENT_PIE_DISTANCE);
+  buttonBar = new Widget(40,120,180,50,"Bar Chart",color(120),stdFont,EVENT_BAR);
+  buttonScatter = new Widget(40,190,180,50,"Scatter",color(140),stdFont,EVENT_SCATTER);
+  buttonPieCancelled = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE_CANCELLED);
+  buttonPieDist = new Widget(40,330,180,50,"Pie Chart Dist",color(160),stdFont,EVENT_PIE_DISTANCE);
 
-  //AirportScreen.add(widgetDrawGraph);
-  //AirportScreen.add(buttonBar);
-  //AirportScreen.add(buttonScatter);
-  //AirportScreen.add(buttonPieCancelled);
-  //AirportScreen.add(buttonPieDist);
+  AirportScreen.add(widgetDrawGraph);
+  AirportScreen.add(buttonBar);
+  AirportScreen.add(buttonScatter);
+  AirportScreen.add(buttonPieCancelled);
+  AirportScreen.add(buttonPieDist);
   AirportScreen.add(backButton);
   
   
@@ -278,12 +278,11 @@ void draw(){
     if(graphType == EVENT_BAR){
       drawBarGraph("MKT_CARRIER");
     }
-    //else if(graphType == EVENT_SCATTER){
-    //  drawScatterPlot(selectedColumn);
-    //}
+    else if(graphType == EVENT_SCATTER){
+      drawScatterPlot(selectedColumn);
+    }
     else if(graphType == EVENT_PIE_CANCELLED){
       drawPieChartCancelled();
-      drawAirlineButtonsCancelled();
     }
     else if(graphType == EVENT_PIE_DISTANCE){
       drawPieChartDistances();
@@ -403,10 +402,10 @@ void mousePressed(){
       graphType = EVENT_BAR;
       break;
 
-    //case EVENT_SCATTER:
-    //  graphType = EVENT_SCATTER;
-    //  switchScreen(graphScreen);
-    //  break;
+    case EVENT_SCATTER:
+      graphType = EVENT_SCATTER;
+      switchScreen(graphScreen);
+      break;
 
     case EVENT_PIE_CANCELLED:
       graphType = EVENT_PIE_CANCELLED;
@@ -580,23 +579,23 @@ void drawPieChartCancelled() {
   text("Not Cancelled: " + notCancelled, cx + 120, cy + r + 40);
 }
 
-//// ================= SCATTER =================
-//void drawScatterPlot(String input) {
-//  int marginL = 260, marginT = 60;
+// ================= SCATTER =================
+void drawScatterPlot(String input) {
+  int marginL = 260, marginT = 60;
 
-//  line(marginL, height-100, width-50, height-100);
-//  line(marginL, marginT, marginL, height-100);
+  line(marginL, height-100, width-50, height-100);
+  line(marginL, marginT, marginL, height-100);
 
-//  for (TableRow row : flightData.rows()) {
-//    float xVal = row.getFloat("DISTANCE");
-//    float yVal = row.getFloat(input);
+  for (TableRow row : flightData.rows()) {
+    float xVal = row.getFloat("DISTANCE");
+    float yVal = row.getFloat(input);
 
-//    float x = map(xVal, 0, 3000, marginL, width-50);
-//    float y = map(yVal, 0, 2400, height-100, marginT);
+    float x = map(xVal, 0, 3000, marginL, width-50);
+    float y = map(yVal, 0, 2400, height-100, marginT);
 
-//    ellipse(x, y, 5, 5);
-//  }
-//}
+    ellipse(x, y, 5, 5);
+  }
+}
 
 // ======== QUERY AIRLENE DISTANCES PIE CHART ==========
 int[] queryAirlineDistances(String airline) {
