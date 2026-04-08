@@ -194,6 +194,9 @@ String selectedAirlineDist;
 String selectedAirlineCancelled;
 int[] countsDist;
 int[] countsCancelled;
+String selectedDistance = "all";
+int[] countsDep = new int[12];
+int[] countsArr = new int[12];
 Widget[] airlineButtonsDist;
 Widget[] airlineButtonsCancelled;
 
@@ -289,7 +292,7 @@ void setup(){
       100, 
       40, 
       airlines.get(i), 
-      color(120), 
+      color(#68D1EA), 
       stdFont, 
       100 + i
     );
@@ -305,7 +308,7 @@ void setup(){
       100, 
       40, 
       airlines.get(i), 
-      color(120), 
+      color(#68D1EA), 
       stdFont, 
       100 + i
     );
@@ -343,8 +346,26 @@ void setup(){
   
   //==============DEP SCREEN
   depScreen = new Screen(color(255));
+  
+  depScreen.add(new Widget(30,120,120,40,"Short",color(120),stdFont,200));
+  depScreen.add(new Widget(30,180,120,40,"Medium",color(120),stdFont,201));
+  depScreen.add(new Widget(30,240,120,40,"Long",color(120),stdFont,202));
+  depScreen.add(new Widget(30,300,120,40,"All",color(120),stdFont,203));
+  depScreen.add(backButton);
+  
+  
+  
   //==============ARR SCREEN
   arrScreen = new Screen(color(255));
+  
+  arrScreen.add(new Widget(30,120,120,40,"Short",color(120),stdFont,200));
+  arrScreen.add(new Widget(30,180,120,40,"Medium",color(120),stdFont,201));
+  arrScreen.add(new Widget(30,240,120,40,"Long",color(120),stdFont,202));
+  arrScreen.add(new Widget(30,300,120,40,"All",color(120),stdFont,203));
+  arrScreen.add(backButton);
+  arrScreen.add(backButton);
+
+  
   //===============MAP SCREEN
   mapScreen = new Screen(color(255));
   mapScreen.add(backButton);
@@ -487,6 +508,18 @@ popStyle();
       drawAirlineButtonsDist();
     }
   }
+ 
+  
+  if(currentScreen == depScreen){
+    computeDepartureCounts();
+    drawTimeChart(countsDep, "Departure Time");
+  }
+  
+  if(currentScreen == arrScreen){
+    computeArrivalCounts();
+    drawTimeChart(countsArr, "Arrival Time");
+  }
+    
 //==============ADDING TO SCREENS
   if(currentScreen == selectionScreen){
     image(planeImage,100,300);
@@ -641,6 +674,28 @@ if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
         currentScreen = screenHistory.remove(screenHistory.size()-1);
       }
       break;
+      
+      
+      
+    case 200:
+      selectedDistance = "short";
+      break;
+    
+    case 201:
+      selectedDistance = "medium";
+      break;
+    
+    case 202:
+      selectedDistance = "long";
+      break;
+    
+    case 203:
+      selectedDistance = "all";
+      break;
+      
+      
+      
+      
     case EVENT_DEP_TIME:
       switchScreen(depScreen);
       break;
@@ -781,7 +836,7 @@ void drawPieChartCancelled() {
   float total = cancelled + notCancelled;
   float angle = map(cancelled, 0, total, 0, TWO_PI);
 
-  float cx = 600, cy = 350, r = 150;
+  float cx = 600, cy = 350, r = 170;
 
   //hover
   float mouseAngle = atan2(mouseY - cy, mouseX - cx);
@@ -900,6 +955,80 @@ void drawPieChartDistances() {
   rect(700, 625, 25, 25);
   text("3000+ km", 740, 645);
 }
+
+// =========== Departure Bar Chart ============
+void computeDepartureCounts() {
+
+  for (int i = 0; i < 12; i++) countsDep[i] = 0;
+
+  for (TableRow row : flightData.rows()) {
+
+    int time = row.getInt("DEP_TIME");  
+    int dist = row.getInt("DISTANCE");    
+
+    if (selectedDistance.equals("short") && dist >= 1000) continue;
+    if (selectedDistance.equals("medium") && (dist < 1000 || dist >= 2000)) continue;
+    if (selectedDistance.equals("long") && dist < 2000) continue;
+
+    int hour = time / 100;
+    int slot = hour / 2;
+
+    countsDep[slot]++;
+  }
+}
+
+
+void drawTimeChart(int[] counts, String title) {
+
+  int marginL = 160;
+  int marginB = 120;
+  int chartW = width - 180;
+  int chartH = height - 220;
+
+  int maxVal = 0;
+  for (int c : counts) if (c > maxVal) maxVal = c;
+
+  float barW = chartW / 12.0;
+
+  for (int i = 0; i < 12; i++) {
+
+    float h = map(counts[i], 0, maxVal, 0, chartH);
+
+    float x = marginL + i * barW;
+    float y = height - marginB - h;
+
+    fill(100,160,220);
+    rect(x, y, barW - 5, h);
+
+    fill(0);
+    textAlign(CENTER);
+    text((i*2) + "-" + (i*2+2), x + barW/2, height - marginB + 20);
+  }
+
+  textAlign(CENTER);
+  text(title, width/2, 50);
+}
+
+// ============= Arrival Bar Chart ==================
+
+void computeArrivalCounts() {
+
+  for (int i = 0; i < 12; i++) countsArr[i] = 0;
+
+  for (TableRow row : flightData.rows()) {
+
+    int time = row.getInt("ARR_TIME");  
+    int dist = row.getInt("DISTANCE");
+
+    if (selectedDistance.equals("short") && dist >= 1000) continue;
+    if (selectedDistance.equals("medium") && (dist < 1000 || dist >= 2000)) continue;
+    if (selectedDistance.equals("long") && dist < 2000) continue;
+
+    int slot = (time / 100) / 2;
+    countsArr[slot]++;
+  }
+}
+
 
 
 // ================= WIDGET =================
