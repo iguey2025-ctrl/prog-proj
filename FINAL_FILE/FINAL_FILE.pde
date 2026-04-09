@@ -255,10 +255,10 @@ void setup(){
   //==============DEP SCREEN
   depScreen = new Screen(color(255));
   
-  depScreen.add(new Widget(30,120,120,40,"Short",color(120),stdFont,200));
-  depScreen.add(new Widget(30,180,120,40,"Medium",color(120),stdFont,201));
-  depScreen.add(new Widget(30,240,120,40,"Long",color(120),stdFont,202));
-  depScreen.add(new Widget(30,300,120,40,"All",color(120),stdFont,203));
+  depScreen.add(new Widget(30,120,120,40,"Short",color(#68D1EA),stdFont,200));
+  depScreen.add(new Widget(30,180,120,40,"Medium",color(#68D1EA),stdFont,201));
+  depScreen.add(new Widget(30,240,120,40,"Long",color(#68D1EA),stdFont,202));
+  depScreen.add(new Widget(30,300,120,40,"All",color(#68D1EA),stdFont,203));
   depScreen.add(backButton);
   
   
@@ -266,10 +266,10 @@ void setup(){
   //==============ARR SCREEN
   arrScreen = new Screen(color(255));
   
-  arrScreen.add(new Widget(30,120,120,40,"Short",color(120),stdFont,200));
-  arrScreen.add(new Widget(30,180,120,40,"Medium",color(120),stdFont,201));
-  arrScreen.add(new Widget(30,240,120,40,"Long",color(120),stdFont,202));
-  arrScreen.add(new Widget(30,300,120,40,"All",color(120),stdFont,203));
+  arrScreen.add(new Widget(30,120,120,40,"Short",color(#68D1EA),stdFont,200));
+  arrScreen.add(new Widget(30,180,120,40,"Medium",color(#68D1EA),stdFont,201));
+  arrScreen.add(new Widget(30,240,120,40,"Long",color(#68D1EA),stdFont,202));
+  arrScreen.add(new Widget(30,300,120,40,"All",color(#68D1EA),stdFont,203));
   arrScreen.add(backButton);
   arrScreen.add(backButton);
 
@@ -875,15 +875,56 @@ void computeDepartureCounts() {
 
 void drawTimeChart(int[] counts, String title) {
 
-  int marginL = 160;
+  int marginL = 200;
   int marginB = 120;
-  int chartW = width - 180;
+  int chartW = width - 220;
   int chartH = height - 220;
+  
+  String rangeOfDist;
+
+  switch(selectedDistance) {
+    case "short":
+      rangeOfDist = "Short flights (0–1000 km)";
+      break;
+    case "medium":
+      rangeOfDist = "Medium flights (1000–2000 km)";
+      break;
+    case "long":
+      rangeOfDist = "Long flights (2000+ km)";
+      break;
+    case "all":
+      rangeOfDist = "All flights";
+    default:
+      rangeOfDist = "All flights";
+  }
+  
+  
+  float x0 = marginL;
+  float y0 = height - marginB;
+  float yTop = y0 - chartH;
 
   int maxVal = 0;
   for (int c : counts) if (c > maxVal) maxVal = c;
 
   float barW = chartW / 12.0;
+
+  stroke(0);
+  line(x0, y0, x0, yTop);        
+  line(x0, y0, x0 + chartW, y0); 
+  
+  int steps = 5;
+
+  for (int i = 0; i <= steps; i++) {
+    float value = i * maxVal / (float)steps;
+    float y = map(value, 0, maxVal, y0, yTop);
+  
+    line(x0 - 5, y, x0, y); // tick
+  
+    fill(0);
+    textAlign(RIGHT);
+    text((int)value, x0 - 10, y + 5);
+  }
+  noStroke();
 
   for (int i = 0; i < 12; i++) {
 
@@ -892,7 +933,9 @@ void drawTimeChart(int[] counts, String title) {
     float x = marginL + i * barW;
     float y = height - marginB - h;
 
-    fill(100,160,220);
+    boolean hover = mouseX >= x && mouseX <= x+barW && mouseY >= y && mouseY <= y+h;
+
+    fill(hover ? color(70, 130, 200) : color(100, 160, 220));
     rect(x, y, barW - 5, h);
 
     fill(0);
@@ -902,6 +945,9 @@ void drawTimeChart(int[] counts, String title) {
 
   textAlign(CENTER);
   text(title, width/2, 50);
+  
+  textSize(14);
+  text("Frequency of " + title + " every 2 hours for " + rangeOfDist, width/2, 70);
 }
 
 // ============= Arrival Bar Chart ==================
