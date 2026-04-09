@@ -1,3 +1,13 @@
+import processing.sound.*;
+SoundFile file;
+SoundFile file2;
+SoundFile file3;
+SoundFile doubleClick;
+SoundFile airplane;
+SoundFile pop;
+SoundFile startSound;
+
+DraggingPic planeIcon;
 PFont stdFont;
 PFont startFont;
 PFont smallFont;
@@ -197,7 +207,7 @@ int[] countsCancelled;
 Widget[] airlineButtonsDist;
 Widget[] airlineButtonsCancelled;
 
-PImage planeImage, title, planeIcon;
+PImage planeImage, title;
 PImage map;
 PImage clouds;
 
@@ -207,14 +217,24 @@ void setup(){
   size(1000,700);
   background(255);
   
-//====================IMAGES==================
+  file = new SoundFile(this, "flightsimsong.mp3");
+  file2 = new SoundFile(this, "click2.mp3");
+  file3 = new SoundFile(this, "click5.mp3");
+  doubleClick = new SoundFile(this,"double.wav");
+  startSound = new SoundFile(this, "startsound.wav");
+  
+  airplane = new SoundFile(this, "airplane.mp3");
+  pop = new SoundFile(this,"pop.mp3");
+  pop.amp(0.7); 
+  file.loop();
+  //====================IMAGES==================
   flightData = loadTable("flights2k.csv", "header");
   planeImage = loadImage("planeIcon.png");
   planeImage.resize(150,100);
   
   clouds = loadImage("clouds.png");
-  planeIcon = loadImage("plane.png");
-  planeIcon.resize(400,100);
+  planeIcon = new DraggingPic(400,100,"plane.png");
+  //planeIcon.resize(400,100);
   title = loadImage("title.png");
   map = loadImage("USMAP.png");
 
@@ -383,6 +403,9 @@ void draw(){
   rect(0,height-8,width,8);
   rect(0,0,8,height);
 
+  planeIcon.display();
+  planeIcon.mouseDragged();
+
   if(currentScreen == airlineSelectScreen){
    pushStyle();
 
@@ -504,7 +527,7 @@ popStyle();
     
     blend(title,0,0,1300,700,100,50,1300,700,DARKEST);
     //image(title, 50,50);
-    image(planeIcon,550,50);
+    //image(planeIcon,550,50);
     clouds.resize(1000,700);
     image(clouds,0,-210);
     fill(#11268B);
@@ -545,15 +568,20 @@ popStyle();
     }  
   }
 }
-
+void mouseReleased() {
+  planeIcon.draggingpicMouseReleased();
+}
 // ================= MOUSE =================
 void mousePressed(){
+  planeIcon.draggingpicMousePressed();
 
+  
   if(currentScreen == airlineSelectScreen){
     for (int i = 0; i < airlineCheckboxes.length; i++) {
       Widget w = airlineCheckboxes[i];
       float y = w.y + 30;
       if(mouseX>w.x && mouseX<w.x+22 && mouseY>y && mouseY<y+22){
+        pop.play();
         String airline = airlines.get(i);
         if(selectedAirlines.contains(airline)){
           selectedAirlines.remove(airline);
@@ -596,10 +624,13 @@ if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
       }
     }
   }
-
+  if(theEvent != EVENT_NULL && theEvent != EVENT_BUTTON_BACK && theEvent!= EVENT_BUTTON_CONTINUE && theEvent!= EVENT_BUTTON_START){
+    file3.play();
+  } 
   switch(theEvent){
-
+    
     case EVENT_BUTTON_START:
+      startSound.play();
       switchScreen(selectionScreen);
       break;
 
@@ -636,6 +667,7 @@ if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
       break;
 
     case EVENT_BUTTON_BACK:
+      doubleClick.play();
       continuePressed = false;
       if(screenHistory.size() > 0){
         currentScreen = screenHistory.remove(screenHistory.size()-1);
@@ -651,6 +683,7 @@ if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
       switchScreen(mapScreen);
       break;
     case EVENT_BUTTON_CONTINUE:
+      doubleClick.play();
       continuePressed = true;;
       break;
     case WA_BUTTON:
@@ -921,12 +954,18 @@ class Widget {
     this.widgetColor = widgetColor;
     this.widgetFont = widgetFont;
   }
-
+boolean alreadyPlaying= false;
   void draw() {
+    
     boolean hover = mouseX>x && mouseX<x+width && mouseY>y && mouseY<y+height;
     if(hover){
       fill(color(70,130,200));
       if(label.equals("Back") == false && label.equals("Continue")==false){
+        if(!alreadyPlaying){
+          alreadyPlaying=true;
+          doubleClick.play();
+          
+        }
         if(currentScreen == introScreen){
            textSize(28);
          }else{
@@ -940,6 +979,7 @@ class Widget {
       }
       
     }else{
+      alreadyPlaying=false;
       fill(widgetColor);
       if(currentScreen==introScreen){
         textSize(23);
@@ -1006,5 +1046,53 @@ class Screen {
   }
    ArrayList getWidgets() {
     return screenWidgets;
+  }
+}
+
+
+class DraggingPic {
+
+  int x;
+  int y;
+  PImage sample;
+
+  // controls whether we are dragging (holding the mouse)
+  boolean hold; 
+
+  // constructor
+  DraggingPic(int posx, int posy, 
+    String imageNameAsString)
+  { 
+    x=posx;
+    y=posy;
+    sample = loadImage(imageNameAsString);
+    sample.resize(330,120);
+  }// constructor
+
+  void display(){
+    image(sample, x, y);
+  }
+
+  void draggingpicMousePressed() {
+    airplane.loop();
+    if (mouseX>x&&
+      mouseY>y&&
+      mouseX<x+sample.width && 
+      mouseY<y+sample.height) {
+      hold=true;
+    }
+  }
+
+  void draggingpicMouseReleased() {
+    airplane.stop();
+    hold=false;
+  }
+
+  void mouseDragged() 
+  {
+    if (hold) {
+      x=mouseX-60; 
+      y=mouseY-60;
+    }
   }
 }
