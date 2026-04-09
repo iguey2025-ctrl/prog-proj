@@ -944,10 +944,10 @@ void drawTimeChart(int[] counts, String title) {
   }
 
   textAlign(CENTER);
-  text(title, width/2, 50);
+  text("Hours in military time", width/2, 650);
   
-  textSize(14);
-  text("Frequency of " + title + " every 2 hours for " + rangeOfDist, width/2, 70);
+  textSize(17);
+  text("Frequency of " + title + " for " + rangeOfDist, width/2, 50);
 }
 
 // ============= Arrival Bar Chart ==================
