@@ -44,119 +44,7 @@ final int EVENT_MAP_BUTTON = 30;
 final int EVENT_DEP_TIME = 31;
 final int EVENT_ARR_TIME = 32;
 
-//============MANUALLY DOING EVERY STATE + BUTTONS
-final int WA_BUTTON = 100;
-final int OR_BUTTON = 101;
-final int CA_BUTTON = 102;
-final int AK_BUTTON = 103;
-final int ID_BUTTON = 104;
-final int NV_BUTTON = 105;
-final int MT_BUTTON = 106;
-final int ND_BUTTON = 107;
-final int MN_BUTTON = 108;
-final int WY_BUTTON = 109;
-final int SD_BUTTON = 110;
-final int WI_BUTTON = 111;
-final int MI_BUTTON = 112;
-final int ME_BUTTON = 113;
-final int UT_BUTTON = 114;
-final int CO_BUTTON = 115;
-final int NE_BUTTON = 116;
-final int IA_BUTTON = 117;
-final int IL_BUTTON = 118;
-final int IN_BUTTON = 119;
-final int OH_BUTTON = 120;
-final int PA_BUTTON = 121;
-final int NY_BUTTON = 122;
-final int VT_BUTTON = 123;
-final int NH_BUTTON = 124;
-final int AZ_BUTTON = 125;
-final int NM_BUTTON = 126;
-final int KS_BUTTON = 127;
-final int MO_BUTTON = 128;
-final int KY_BUTTON = 129;
-final int WV_BUTTON = 130;
-final int VA_BUTTON = 131;
-final int MD_BUTTON = 132;
-final int DE_BUTTON = 133;
-final int NJ_BUTTON = 134;
-final int CT_BUTTON = 135;
-final int RI_BUTTON = 136;
-final int MA_BUTTON = 137;
-final int OK_BUTTON = 138;
-final int AR_BUTTON = 139;
-final int TN_BUTTON = 140;
-final int NC_BUTTON = 141;
-final int SC_BUTTON = 142;
-final int TX_BUTTON = 143;
-final int LA_BUTTON = 144;
-final int MS_BUTTON = 145;
-final int AL_BUTTON = 146;
-final int GA_BUTTON = 147;
-final int FL_BUTTON = 148;
-final int HI_BUTTON = 149;
-
-String[] stateNames = {"AK",
-    "WA", "ID", "MT", "ND", "MN",
-    "OR", "NV", "WY", "SD", "WI", "MI", "ME",
-    "CA", "UT", "CO", "NE", "IA", "IL", "IN", "OH", "PA", "NY", "VT", "NH",
-    "AZ", "NM", "KS", "MO", "KY", "WV", "VA", "MD", "DE", "NJ", "CT", "RI", "MA",
-    "OK", "AR", "TN", "NC", "SC",
-    "TX", "LA", "MS", "AL", "GA",
-    "FL",
-    "HI"};
-
-Widget WA;
-Widget OR;
-Widget CA;
-Widget AK;
-Widget ID;
-Widget NV;
-Widget MT;
-Widget ND;
-Widget MN;
-Widget WY;
-Widget SD;
-Widget WI;
-Widget MI;
-Widget ME;
-Widget UT;
-Widget CO;
-Widget NE;
-Widget IA;
-Widget IL;
-Widget IN;
-Widget OH;
-Widget PA;
-Widget NY;
-Widget VT;
-Widget NH;
-Widget AZ;
-Widget NM;
-Widget KS;
-Widget MO;
-Widget KY;
-Widget WV;
-Widget VA;
-Widget MD;
-Widget DE;
-Widget NJ;
-Widget CT;
-Widget RI;
-Widget MA;
-Widget OK;
-Widget AR;
-Widget TN;
-Widget NC;
-Widget SC;
-Widget TX;
-Widget LA;
-Widget MS;
-Widget AL;
-Widget GA;
-Widget FL;
-Widget HI;
-
+ 
 Table flightData;
 
 Screen introScreen;
@@ -266,16 +154,16 @@ void setup(){
   selectionScreen = new Screen(color(#BAEBFC));
   selectAirlineButton = new Widget(370,250,250,50,"Airline",color(#68D1EA),stdFont,20);
   selectAirportButton = new Widget(370,320,250,50,"Successful Flights",color(#68D1EA),stdFont,EVENT_PIE_CANCELLED);
-  mapButton = new Widget(370,530,250,50,"View Map", color(#68D1EA), stdFont, EVENT_MAP_BUTTON);
+  //mapButton = new Widget(370,530,250,50,"View Map", color(#68D1EA), stdFont, EVENT_MAP_BUTTON);
   depButton = new Widget(370,390,250,50,"Departure Time", color(#68D1EA), stdFont, EVENT_DEP_TIME);
   arrButton = new Widget(370,460,250,50,"Arrival Time", color(#68D1EA), stdFont, EVENT_ARR_TIME);
-  showDistancesButton = new Widget(370,600,250,50,"Distance",color(#68D1EA),stdFont,EVENT_SHOW_DISTANCES);
+  showDistancesButton = new Widget(370,530,250,50,"Distance",color(#68D1EA),stdFont,EVENT_SHOW_DISTANCES);
 
   selectionScreen.add(showDistancesButton);
   selectionScreen.add(selectAirlineButton);
   selectionScreen.add(selectAirportButton);
   selectionScreen.add(backButton);
-  selectionScreen.add(mapButton);
+  //selectionScreen.add(mapButton);
   selectionScreen.add(depButton);
   selectionScreen.add(arrButton);
 
@@ -385,30 +273,7 @@ void setup(){
   arrScreen.add(backButton);
   arrScreen.add(backButton);
 
-  
-  //===============MAP SCREEN
-  mapScreen = new Screen(color(255));
-  mapScreen.add(backButton);
-  mapScreen.add(continueButton);
-  
-  color squareColor = color(255,255,0);
-  WA = new Widget(160,110,40,40," ",color(squareColor), stdFont, WA_BUTTON);
-  mapScreen.add(WA);
-  OR = new Widget(140,130,40,40,"OR", color(squareColor), stdFont, OR_BUTTON);
-  mapScreen.add(WA);
-  int x = 160;
-  
-  for (int i=0; i<50;i++){
-    String st = stateNames[i];
-    int y = 110 + i*40;
-    if(i%5==0){
-      x = x+50;
-      y = 110;
-    }
-    
-    Widget state = new Widget(x, y, 40,40,st, color(squareColor), stdFont, 100+i);
-    mapScreen.add(state);
-  }
+ 
   
 }
 
@@ -510,6 +375,7 @@ popStyle();
       textSize(20);
       text("Please select an airline!", 500, 350);
     } else {
+      
       drawBarGraph("MKT_CARRIER");
     }
   }
@@ -610,6 +476,7 @@ void mousePressed(){
 
   
   if(currentScreen == airlineSelectScreen){
+    
     for (int i = 0; i < airlineCheckboxes.length; i++) {
       Widget w = airlineCheckboxes[i];
       float y = w.y + 30;
@@ -741,12 +608,7 @@ if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
       doubleClick.play();
       continuePressed = true;;
       break;
-    case WA_BUTTON:
-      if(arrSelection == true){
-        selectedArrState = "WA";
-      }else if(depSelection == true){
-        selectedDepState = "WA";
-      }
+    
   }
 
   
@@ -888,7 +750,7 @@ void drawPieChartCancelled() {
   //labels
   fill(0);
   textAlign(CENTER);
-  text("Cancelled/Not Cancelled Flights", cx, 80);
+  text("Cancelled vs Not Cancelled Flights", cx, 80);
 
   text("Cancelled: " + cancelled, cx - 120, cy + r + 40);
   text("Not Cancelled: " + notCancelled, cx + 120, cy + r + 40);
