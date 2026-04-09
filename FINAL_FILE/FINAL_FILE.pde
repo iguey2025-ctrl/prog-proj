@@ -195,8 +195,8 @@ void setup(){
   
   for (int i = 0; i < n; i++) {
     airlineButtonsDist[i] = new Widget(
-      30, 
-      80 + i * 50, 
+      120, 
+      110 + i * 50, 
       100, 
       40, 
       airlines.get(i), 
@@ -211,8 +211,8 @@ void setup(){
   
   for (int i = 0; i < n; i++) {
     airlineButtonsCancelled[i] = new Widget(
-      30, 
-      80 + i * 50, 
+      120, 
+      110 + i * 50, 
       100, 
       40, 
       airlines.get(i), 
