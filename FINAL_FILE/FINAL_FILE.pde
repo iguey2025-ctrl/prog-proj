@@ -26,10 +26,8 @@ final int EVENT_BUTTON_DRAW=2;
 final int EVENT_BUTTON_START =5;
 final int EVENT_BUTTON_BACK =6;
 final int EVENT_BUTTON_CONTINUE = 40;
-//final int EVENT_BUTTON_EXIT =7;
 
 final int EVENT_BAR = 10;
-//final int EVENT_SCATTER = 11;
 final int EVENT_PIE_CANCELLED = 12;
 final int EVENT_PIE_DISTANCE = 13;
 final int EVENT_NULL=0;
@@ -63,7 +61,6 @@ ArrayList<Screen> screenHistory = new ArrayList<Screen>();
 Widget widgetDrawGraph;
 Widget startButton;
 Widget introStartButton;
-//Widget exitButton;
 Widget backButton;
 Widget continueButton; // for map Screen
 Widget confirmAirlinesButton;
@@ -71,7 +68,6 @@ Widget showDistancesButton;
 Widget mapButton;
 Widget depButton;
 Widget arrButton;
-
 
 Widget buttonBar;
 Widget buttonScatter;
@@ -101,7 +97,6 @@ Widget[] airlineButtonsCancelled;
 PImage planeImage, title;
 PImage map;
 PImage clouds;
-
 
 // ================= SETUP =================
 void setup(){
@@ -143,18 +138,12 @@ void setup(){
   
   introStartButton = new Widget(400,540,200,50,"START",color(#4D92F0),stdFont,EVENT_BUTTON_START);
   introStartButton.changeTextSize(25);
-  //exitButton = new Widget(400,420,200,80,"EXIT",color(#DE2D44),stdFont,EVENT_BUTTON_EXIT);
-  //introScreen.add(introStartButton);
-  
-  //introScreen.add(exitButton);
-
 
 
   // ===== SELECTION SCREEN =====
   selectionScreen = new Screen(color(#BAEBFC));
   selectAirlineButton = new Widget(370,250,250,50,"Airline",color(#68D1EA),stdFont,20);
   selectAirportButton = new Widget(370,320,250,50,"Successful Flights",color(#68D1EA),stdFont,EVENT_PIE_CANCELLED);
-  //mapButton = new Widget(370,530,250,50,"View Map", color(#68D1EA), stdFont, EVENT_MAP_BUTTON);
   depButton = new Widget(370,390,250,50,"Departure Time", color(#68D1EA), stdFont, EVENT_DEP_TIME);
   arrButton = new Widget(370,460,250,50,"Arrival Time", color(#68D1EA), stdFont, EVENT_ARR_TIME);
   showDistancesButton = new Widget(370,530,250,50,"Distance",color(#68D1EA),stdFont,EVENT_SHOW_DISTANCES);
@@ -163,7 +152,6 @@ void setup(){
   selectionScreen.add(selectAirlineButton);
   selectionScreen.add(selectAirportButton);
   selectionScreen.add(backButton);
-  //selectionScreen.add(mapButton);
   selectionScreen.add(depButton);
   selectionScreen.add(arrButton);
 
@@ -230,24 +218,10 @@ void setup(){
 
   confirmAirlinesButton = new Widget(300,600,200,60,"Show Flights",color(#68D1EA),stdFont,EVENT_CONFIRM_AIRLINES);
 
-  //airlineSelectScreen.add(confirmAirlinesButton);
   airlineSelectScreen.add(backButton);
 
   // ===== AIRPORT SCREEN =====
   AirportScreen = new Screen(color(255));
-
-  //widgetDrawGraph = new Widget(400,300,200,60,"Draw Graph",color(#68D1EA),stdFont,EVENT_BUTTON_DRAW);
-
-  //buttonBar = new Widget(40,120,180,50,"Bar Chart",color(120),stdFont,EVENT_BAR);
-  //buttonScatter = new Widget(40,190,180,50,"Scatter",color(140),stdFont,EVENT_SCATTER);
-  //buttonPieCancelled = new Widget(40,260,180,50,"Pie Chart",color(160),stdFont,EVENT_PIE_CANCELLED);
-  //buttonPieDist = new Widget(40,330,180,50,"Pie Chart Dist",color(160),stdFont,EVENT_PIE_DISTANCE);
-
-  //AirportScreen.add(widgetDrawGraph);
-  //AirportScreen.add(buttonBar);
-  //AirportScreen.add(buttonScatter);
-  //AirportScreen.add(buttonPieCancelled);
-  //AirportScreen.add(buttonPieDist);
   AirportScreen.add(backButton);
   
   
@@ -261,8 +235,6 @@ void setup(){
   depScreen.add(new Widget(30,300,120,40,"All",color(#68D1EA),stdFont,203));
   depScreen.add(backButton);
   
-  
-  
   //==============ARR SCREEN
   arrScreen = new Screen(color(255));
   
@@ -272,9 +244,6 @@ void setup(){
   arrScreen.add(new Widget(30,300,120,40,"All",color(#68D1EA),stdFont,203));
   arrScreen.add(backButton);
   arrScreen.add(backButton);
-
- 
-  
 }
 
 // ================= DRAW =================
@@ -293,101 +262,96 @@ void draw(){
   planeIcon.mouseDragged();
 
   if(currentScreen == airlineSelectScreen){
-   pushStyle();
-
-textSize(24);
-fill(0);
-text("Select Airlines:", 125, 110);
-
-// ===== SELECT ALL CHECKBOX =====
-boolean hoverAll = mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177;
-
-// auto-sync state
-selectAllChecked = (selectedAirlines.size() == airlines.size());
-
-if(selectAllChecked){
-  fill(70,130,200);
-} else if(hoverAll){
-  fill(220);
-} else {
-  fill(245);
-}
-
-stroke(selectAllChecked ? color(70,130,200) : color(180));
-strokeWeight(2);
-rect(80, 155, 22, 22, 6);
-
-// checkmark
-if(selectAllChecked){
-  stroke(255);
-  strokeWeight(3);
-line(85, 167, 90, 172);
-line(90, 172, 97, 161);
-}
-
-fill(30);
-textAlign(LEFT, CENTER);
-textSize(16);
-text("Select All", 115, 165);
-
-
-// ===== NORMAL CHECKBOXES =====
-for(int i=0;i<airlineCheckboxes.length;i++){
-  Widget w = airlineCheckboxes[i];
-
-  // shift down so it doesn’t overlap
-  int yOffset = 30;
-  float y = w.y + yOffset;
-
-  boolean hover = mouseX>w.x && mouseX<w.x+22 && mouseY>y && mouseY<y+22;
-  boolean selected = selectedAirlines.contains(airlines.get(i));
-
-  if(selected){
-    fill(70, 130, 200);
-  } else if(hover){
-    fill(220);
-  } else {
-    fill(245);
-  }
-
-  stroke(selected ? color(70,130,200) : color(180));
-  strokeWeight(2);
-  rect(w.x, y, 22, 22, 6);
-
-  if(selected){
-    stroke(255);
-    strokeWeight(3);
-    line(w.x+5, y+12, w.x+10, y+17);
-    line(w.x+10, y+17, w.x+17, y+6);
-  }
-
-  fill(30);
-  textAlign(LEFT, CENTER);
-  textSize(14);
-  text(airlines.get(i), w.x+35, y+11);
-}
-
-popStyle();
-
+    pushStyle();
+  
+    textSize(24);
+    fill(0);
+    text("Select Airlines:", 125, 110);
+    
+    // ===== SELECT ALL CHECKBOX =====
+    boolean hoverAll = mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177;
+    
+    // auto-sync state
+    selectAllChecked = (selectedAirlines.size() == airlines.size());
+    
+    if(selectAllChecked){
+      fill(70,130,200);
+    } else if(hoverAll){
+      fill(220);
+    } else {
+      fill(245);
+    }
+    
+    stroke(selectAllChecked ? color(70,130,200) : color(180));
+    strokeWeight(2);
+    rect(80, 155, 22, 22, 6);
+    
+    // checkmark
+    if(selectAllChecked){
+      stroke(255);
+      strokeWeight(3);
+    line(85, 167, 90, 172);
+    line(90, 172, 97, 161);
+    }
+    
+    fill(30);
+    textAlign(LEFT, CENTER);
+    textSize(16);
+    text("Select All", 115, 165);
+  
+  
+    // ===== NORMAL CHECKBOXES =====
+    for(int i=0;i<airlineCheckboxes.length;i++){
+      Widget w = airlineCheckboxes[i];
+    
+      // shift down so it doesn’t overlap
+      int yOffset = 30;
+      float y = w.y + yOffset;
+    
+      boolean hover = mouseX>w.x && mouseX<w.x+22 && mouseY>y && mouseY<y+22;
+      boolean selected = selectedAirlines.contains(airlines.get(i));
+    
+      if(selected){
+        fill(70, 130, 200);
+      } else if(hover){
+        fill(220);
+      } else {
+        fill(245);
+      }
+    
+      stroke(selected ? color(70,130,200) : color(180));
+      strokeWeight(2);
+      rect(w.x, y, 22, 22, 6);
+    
+      if(selected){
+        stroke(255);
+        strokeWeight(3);
+        line(w.x+5, y+12, w.x+10, y+17);
+        line(w.x+10, y+17, w.x+17, y+6);
+      }
+    
+      fill(30);
+      textAlign(LEFT, CENTER);
+      textSize(14);
+      text(airlines.get(i), w.x+35, y+11);
+   }
+  
+   popStyle();
+  
     // IF NONE SELECTED
     if(selectedAirlines.size() == 0){
       fill(200,0,0);
       textSize(20);
       text("Please select an airline!", 500, 350);
     } else {
-      
       drawBarGraph("MKT_CARRIER");
     }
   }
-
 
   if(currentScreen == graphScreen){
     if(graphType == EVENT_BAR){
       drawBarGraph("MKT_CARRIER");
     }
-    //else if(graphType == EVENT_SCATTER){
-    //  drawScatterPlot(selectedColumn);
-    //}
     else if(graphType == EVENT_PIE_CANCELLED){
       drawPieChartCancelled();
       drawAirlineButtonsCancelled();
@@ -398,7 +362,6 @@ popStyle();
     }
   }
  
-  
   if(currentScreen == depScreen){
     computeDepartureCounts();
     drawTimeChart(countsDep, "Departure Time");
@@ -409,7 +372,7 @@ popStyle();
     drawTimeChart(countsArr, "Arrival Time");
   }
     
-//==============ADDING TO SCREENS
+//==============ADDING TO SCREENS============
   if(currentScreen == selectionScreen){
     
     noStroke();
@@ -425,8 +388,6 @@ popStyle();
     title.resize(1300,700);
     
     blend(title,0,0,1300,700,100,50,1300,700,DARKEST);
-    //image(title, 50,50);
-    //image(planeIcon,550,50);
     clouds.resize(1000,700);
     image(clouds,0,-210);
     fill(#11268B);
@@ -574,8 +535,6 @@ if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
       }
       break;
       
-      
-      
     case 200:
       selectedDistance = "short";
       break;
@@ -592,9 +551,7 @@ if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
       selectedDistance = "all";
       break;
       
-      
-      
-      
+
     case EVENT_DEP_TIME:
       switchScreen(depScreen);
       break;
@@ -608,11 +565,7 @@ if(mouseX>80 && mouseX<102 && mouseY>155 && mouseY<177){
       doubleClick.play();
       continuePressed = true;;
       break;
-    
   }
-
-  
-  
 }
 
 // BAR GRAPH + filtering added
@@ -703,8 +656,6 @@ void switchScreen(Screen newScreen){
   currentScreen = newScreen;
 }
 
-
-
 // ======= QUERY CANCELLED FLIGHTS ===========
 int[] queryCancelledByAirport(String airport) {
   int[] counts = new int[2]; 
@@ -756,23 +707,6 @@ void drawPieChartCancelled() {
   text("Not Cancelled: " + notCancelled, cx + 120, cy + r + 40);
 }
 
-//// ================= SCATTER =================
-//void drawScatterPlot(String input) {
-//  int marginL = 260, marginT = 60;
-
-//  line(marginL, height-100, width-50, height-100);
-//  line(marginL, marginT, marginL, height-100);
-
-//  for (TableRow row : flightData.rows()) {
-//    float xVal = row.getFloat("DISTANCE");
-//    float yVal = row.getFloat(input);
-
-//    float x = map(xVal, 0, 3000, marginL, width-50);
-//    float y = map(yVal, 0, 2400, height-100, marginT);
-
-//    ellipse(x, y, 5, 5);
-//  }
-//}
 
 // ======== QUERY AIRLENE DISTANCES PIE CHART ==========
 int[] queryAirlineDistances(String airline) {
@@ -833,7 +767,6 @@ void drawPieChartDistances() {
   textAlign(LEFT);
   text("Airline: " + selectedAirlineDist, 600, 80);
   
-  //textFont(smallFont);
   fill(227, 59, 84);
   rect(700, 520, 25, 25);
   text("to 1000 km", 740, 540);
@@ -969,8 +902,6 @@ void computeArrivalCounts() {
     countsArr[slot]++;
   }
 }
-
-
 
 // ================= WIDGET =================
 class Widget {
